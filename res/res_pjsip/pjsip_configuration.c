@@ -158,6 +158,7 @@ static int persistent_endpoint_update_state(void *obj, void *arg, int flags)
 
 /*! \brief Function called when a contact is created */
 static void persistent_endpoint_contact_created_observer(const void *object)
+<<<<<<< HEAD
 {
 	const struct ast_sip_contact *contact = object;
 	struct ast_sip_contact_status *contact_status;
@@ -198,6 +199,51 @@ static void persistent_endpoint_contact_deleted_observer(const void *object)
 	ast_statsd_log_string_va("PJSIP.contacts.states.%s", AST_STATSD_GAUGE,
 		"+1", 1.0, ast_sip_get_contact_status_label(REMOVED));
 
+=======
+{
+	const struct ast_sip_contact *contact = object;
+	struct ast_sip_contact_status *contact_status;
+
+	contact_status = ast_sorcery_alloc(ast_sip_get_sorcery(), CONTACT_STATUS,
+		ast_sorcery_object_get_id(contact));
+	if (!contact_status) {
+		ast_log(LOG_ERROR, "Unable to create ast_sip_contact_status for contact %s/%s\n",
+			contact->aor, contact->uri);
+		return;
+	}
+	contact_status->uri = ast_strdup(contact->uri);
+	if (!contact_status->uri) {
+		ao2_cleanup(contact_status);
+		return;
+	}
+	contact_status->status = CREATED;
+
+	ast_verb(1, "Contact %s/%s has been created\n",contact->aor, contact->uri);
+
+	ao2_callback(persistent_endpoints, OBJ_NODATA, persistent_endpoint_update_state, contact_status);
+	ao2_cleanup(contact_status);
+}
+
+/*! \brief Function called when a contact is deleted */
+static void persistent_endpoint_contact_deleted_observer(const void *object)
+{
+	const struct ast_sip_contact *contact = object;
+	struct ast_sip_contact_status *contact_status;
+
+	contact_status = ast_sorcery_retrieve_by_id(ast_sip_get_sorcery(), CONTACT_STATUS, ast_sorcery_object_get_id(contact));
+	if (!contact_status) {
+		ast_log(LOG_ERROR, "Unable to create ast_sip_contact_status for contact %s/%s\n",
+			contact->aor, contact->uri);
+		return;
+	}
+
+	ast_verb(1, "Contact %s/%s has been deleted\n", contact->aor, contact->uri);
+	ast_statsd_log_string_va("PJSIP.contacts.states.%s", AST_STATSD_GAUGE,
+		"-1", 1.0, ast_sip_get_contact_status_label(contact_status->status));
+	ast_statsd_log_string_va("PJSIP.contacts.states.%s", AST_STATSD_GAUGE,
+		"+1", 1.0, ast_sip_get_contact_status_label(REMOVED));
+
+>>>>>>> upstream/certified/13.8
 	ao2_callback(persistent_endpoints, OBJ_NODATA, persistent_endpoint_update_state, contact_status);
 	ast_sorcery_delete(ast_sip_get_sorcery(), contact_status);
 	ao2_cleanup(contact_status);
@@ -410,7 +456,11 @@ int ast_sip_auth_vector_init(struct ast_sip_auth_vector *auths, const char *valu
 		return -1;
 	}
 
+<<<<<<< HEAD
 	while ((val = strsep(&auth_names, ","))) {
+=======
+	while ((val = ast_strip(strsep(&auth_names, ",")))) {
+>>>>>>> upstream/certified/13.8
 		if (ast_strlen_zero(val)) {
 			continue;
 		}
@@ -477,7 +527,11 @@ static int ident_handler(const struct aco_option *opt, struct ast_variable *var,
 	char *idents = ast_strdupa(var->value);
 	char *val;
 
-	while ((val = strsep(&idents, ","))) {
+	while ((val = ast_strip(strsep(&idents, ",")))) {
+		if (ast_strlen_zero(val)) {
+			continue;
+		}
+
 		if (!strcasecmp(val, "username")) {
 			endpoint->ident_method |= AST_SIP_ENDPOINT_IDENTIFY_BY_USERNAME;
 		} else {
@@ -1884,7 +1938,11 @@ int ast_res_pjsip_initialize_configuration(void)
 	ast_sorcery_object_field_register(sip_sorcery, "endpoint", "trust_id_outbound", "no", OPT_BOOL_T, 1, FLDSET(struct ast_sip_endpoint, id.trust_outbound));
 	ast_sorcery_object_field_register(sip_sorcery, "endpoint", "send_pai", "no", OPT_BOOL_T, 1, FLDSET(struct ast_sip_endpoint, id.send_pai));
 	ast_sorcery_object_field_register(sip_sorcery, "endpoint", "send_rpid", "no", OPT_BOOL_T, 1, FLDSET(struct ast_sip_endpoint, id.send_rpid));
+<<<<<<< HEAD
 	ast_sorcery_object_field_register(sip_sorcery, "endpoint", "rpid_immediate", "no", OPT_BOOL_T, 1, FLDSET(struct ast_sip_endpoint, id.rpid_immediate));
+=======
+	ast_sorcery_object_field_register(sip_sorcery, "endpoint", "rpid_immediate", "no", OPT_BOOL_T, 1, FLDSET(struct ast_sip_endpoint, rpid_immediate));
+>>>>>>> upstream/certified/13.8
 	ast_sorcery_object_field_register(sip_sorcery, "endpoint", "send_diversion", "yes", OPT_BOOL_T, 1, FLDSET(struct ast_sip_endpoint, id.send_diversion));
 	ast_sorcery_object_field_register(sip_sorcery, "endpoint", "mailboxes", "", OPT_STRINGFIELD_T, 0, STRFLDSET(struct ast_sip_endpoint, subscription.mwi.mailboxes));
 	ast_sorcery_object_field_register(sip_sorcery, "endpoint", "aggregate_mwi", "yes", OPT_BOOL_T, 1, FLDSET(struct ast_sip_endpoint, subscription.mwi.aggregate));
@@ -1914,7 +1972,10 @@ int ast_res_pjsip_initialize_configuration(void)
 	ast_sorcery_object_field_register(sip_sorcery, "endpoint", "record_off_feature", "automixmon", OPT_STRINGFIELD_T, 0, STRFLDSET(struct ast_sip_endpoint, info.recording.offfeature));
 	ast_sorcery_object_field_register(sip_sorcery, "endpoint", "allow_transfer", "yes", OPT_BOOL_T, 1, FLDSET(struct ast_sip_endpoint, allowtransfer));
 	ast_sorcery_object_field_register(sip_sorcery, "endpoint", "user_eq_phone", "no", OPT_BOOL_T, 1, FLDSET(struct ast_sip_endpoint, usereqphone));
+<<<<<<< HEAD
 	ast_sorcery_object_field_register(sip_sorcery, "endpoint", "moh_passthrough", "no", OPT_BOOL_T, 1, FLDSET(struct ast_sip_endpoint, moh_passthrough));
+=======
+>>>>>>> upstream/certified/13.8
 	ast_sorcery_object_field_register(sip_sorcery, "endpoint", "sdp_owner", "-", OPT_STRINGFIELD_T, 0, STRFLDSET(struct ast_sip_endpoint, media.sdpowner));
 	ast_sorcery_object_field_register(sip_sorcery, "endpoint", "sdp_session", "Asterisk", OPT_STRINGFIELD_T, 0, STRFLDSET(struct ast_sip_endpoint, media.sdpsession));
 	ast_sorcery_object_field_register_custom(sip_sorcery, "endpoint", "tos_audio", "0", tos_handler, tos_audio_to_str, NULL, 0, 0);

@@ -36,6 +36,10 @@
 	<depend>pjproject</depend>
 	<depend>res_pjsip</depend>
 	<depend>res_phoneprov</depend>
+<<<<<<< HEAD
+=======
+	<defaultenabled>no</defaultenabled>
+>>>>>>> upstream/certified/13.8
 	<support_level>extended</support_level>
  ***/
 
@@ -413,8 +417,16 @@ static int reload_module(void)
 }
 
 AST_MODULE_INFO(ASTERISK_GPL_KEY, AST_MODFLAG_LOAD_ORDER, "PJSIP Phoneprov Provider",
+<<<<<<< HEAD
 	.load = load_module,
 	.reload = reload_module,
 	.unload = unload_module,
 	.load_pri = AST_MODPRI_APP_DEPEND,
 );
+=======
+		.load = load_module,
+		.reload = reload_module,
+		.unload = unload_module,
+		.load_pri = AST_MODPRI_APP_DEPEND,
+		);
+>>>>>>> upstream/certified/13.8

@@ -3,7 +3,11 @@
 AWK=${AWK:-awk}
 GIT=${GIT:-git}
 GREP=${GREP:-grep}
+<<<<<<< HEAD
 MAINLINE_BRANCH=master
+=======
+MAINLINE_BRANCH=13
+>>>>>>> upstream/certified/13.8
 
 if [ -f ${1}/.version ]; then
     cat ${1}/.version

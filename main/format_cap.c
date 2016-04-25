@@ -129,9 +129,32 @@ struct ast_format_cap *__ast_format_cap_alloc(enum ast_format_cap_flags flags,
 
 	if (format_cap_init(cap, flags)) {
 		ao2_ref(cap, -1);
+<<<<<<< HEAD
 		return NULL;
 	}
 
+=======
+		return NULL;
+	}
+
+	return cap;
+}
+
+struct ast_format_cap *__ast_format_cap_alloc_debug(enum ast_format_cap_flags flags, const char *tag, const char *file, int line, const char *func)
+{
+	struct ast_format_cap *cap;
+
+	cap = __ao2_alloc_debug(sizeof(*cap), format_cap_destroy, AO2_ALLOC_OPT_LOCK_NOLOCK, S_OR(tag, "ast_format_cap_alloc"), file, line, func, 1);
+	if (!cap) {
+		return NULL;
+	}
+
+	if (format_cap_init(cap, flags)) {
+		ao2_ref(cap, -1);
+		return NULL;
+	}
+
+>>>>>>> upstream/certified/13.8
 	return cap;
 }
 

@@ -547,8 +547,7 @@ enum sipregistrystate {
 		 * recover (not sure how correctly).
 		 */
 
-	REG_STATE_TIMEOUT,	/*!< Registration timed out
-		* \note XXX unused */
+	REG_STATE_TIMEOUT,	/*!< Registration about to expire, renewing registration */
 
 	REG_STATE_NOAUTH,	/*!< We have no accepted credentials
 		 * \note fatal - no chance to proceed */
@@ -959,7 +958,6 @@ struct sip_st_dlg {
 	int st_cached_max_se;              /*!< Session-Timers cached Session-Expires */
 	enum st_mode st_cached_mode;       /*!< Session-Timers cached M.O. */
 	enum st_refresher st_cached_ref;   /*!< Session-Timers session refresher */
-	unsigned char quit_flag:1;         /*!< Stop trying to lock; just quit */
 };
 
 

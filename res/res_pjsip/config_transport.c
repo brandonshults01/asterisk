@@ -422,7 +422,13 @@ static int has_state_changed(struct ast_sip_transport_state *a, struct ast_sip_t
 
 	if (a->tls.method != b->tls.method
 		|| a->tls.ciphers_num != b->tls.ciphers_num
+<<<<<<< HEAD
 		|| a->tls.proto != b->tls.proto
+=======
+#ifdef HAVE_PJSIP_TLS_TRANSPORT_PROTO
+		|| a->tls.proto != b->tls.proto
+#endif
+>>>>>>> upstream/certified/13.8
 		|| a->tls.verify_client != b->tls.verify_client
 		|| a->tls.verify_server != b->tls.verify_server
 		|| a->tls.require_client_cert != b->tls.require_client_cert) {
@@ -985,8 +991,12 @@ static int transport_tls_cipher_handler(const struct aco_option *opt, struct ast
 	}
 
 	parse = ast_strdupa(S_OR(var->value, ""));
+<<<<<<< HEAD
 	while ((name = strsep(&parse, ","))) {
 		name = ast_strip(name);
+=======
+	while ((name = ast_strip(strsep(&parse, ",")))) {
+>>>>>>> upstream/certified/13.8
 		if (ast_strlen_zero(name)) {
 			continue;
 		}

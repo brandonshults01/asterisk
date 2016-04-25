@@ -25,7 +25,11 @@
 
 #include "asterisk.h"
 
+<<<<<<< HEAD
 ASTERISK_REGISTER_FILE()
+=======
+ASTERISK_FILE_VERSION(__FILE__, "$Revision$")
+>>>>>>> upstream/certified/13.8
 
 #include <pjsip.h>
 #include <pjsip_ua.h>

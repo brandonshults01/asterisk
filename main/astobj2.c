@@ -558,10 +558,44 @@ int __ao2_ref(void *user_data, int delta,
 		break;
 	}
 
+<<<<<<< HEAD
 	if (ref_log && tag) {
 		fprintf(ref_log, "%p,%d,%d,%s,%d,%s,**destructor**,%s\n",
 			user_data, delta, ast_get_tid(), file, line, func, tag);
 		fflush(ref_log);
+=======
+	return ret;
+}
+
+int __ao2_ref_debug(void *user_data, int delta, const char *tag, const char *file, int line, const char *func)
+{
+	struct astobj2 *obj = INTERNAL_OBJ(user_data);
+	int old_refcount = -1;
+
+	if (obj) {
+		old_refcount = internal_ao2_ref(user_data, delta, file, line, func);
+	}
+
+	if (ref_log && user_data) {
+		if (!obj) {
+			/* Invalid object: Bad magic number. */
+			fprintf(ref_log, "%p,%d,%d,%s,%d,%s,**invalid**,%s\n",
+				user_data, delta, ast_get_tid(), file, line, func, tag);
+			fflush(ref_log);
+		} else if (old_refcount + delta == 0) {
+			fprintf(ref_log, "%p,%d,%d,%s,%d,%s,**destructor**,%s\n",
+				user_data, delta, ast_get_tid(), file, line, func, tag);
+			fflush(ref_log);
+		} else if (delta != 0) {
+			fprintf(ref_log, "%p,%s%d,%d,%s,%d,%s,%d,%s\n", user_data, (delta < 0 ? "" : "+"),
+				delta, ast_get_tid(), file, line, func, old_refcount, tag);
+			fflush(ref_log);
+		}
+	}
+
+	if (obj == NULL) {
+		ast_assert(0);
+>>>>>>> upstream/certified/13.8
 	}
 
 	return ret;
@@ -1142,6 +1176,7 @@ static void astobj2_cleanup(void)
 int astobj2_init(void)
 {
 	char ref_filename[1024];
+<<<<<<< HEAD
 
 	if (ast_opt_ref_debug) {
 		snprintf(ref_filename, sizeof(ref_filename), "%s/refs", ast_config_AST_LOG_DIR);
@@ -1149,6 +1184,18 @@ int astobj2_init(void)
 		if (!ref_log) {
 			ast_log(LOG_ERROR, "Could not open ref debug log file: %s\n", ref_filename);
 		}
+	}
+
+	if (container_init() != 0) {
+		fclose(ref_log);
+		return -1;
+=======
+
+	snprintf(ref_filename, sizeof(ref_filename), "%s/refs", ast_config_AST_LOG_DIR);
+	ref_log = fopen(ref_filename, "w");
+	if (!ref_log) {
+		ast_log(LOG_ERROR, "Could not open ref debug log file: %s\n", ref_filename);
+>>>>>>> upstream/certified/13.8
 	}
 
 	if (container_init() != 0) {

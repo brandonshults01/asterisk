@@ -378,9 +378,15 @@
 #define DEFAULT_ATXFER_COMPLETE                     "*2"
 #define DEFAULT_ATXFER_THREEWAY                     "*3"
 #define DEFAULT_ATXFER_SWAP                         "*4"
+<<<<<<< HEAD
 #define DEFAULT_TRANSFER_DIAL_ATTEMPTS              3
 #define DEFAULT_TRANSFER_RETRY_SOUND                "pbx-invalid"
 #define DEFAULT_TRANSFER_INVALID_SOUND              "privacy-incorrect"
+=======
+#define DEFAULT_TRANSFER_DIAL_ATTEMPTS              1
+#define DEFAULT_TRANSFER_RETRY_SOUND                "pbx-invalid"
+#define DEFAULT_TRANSFER_INVALID_SOUND              "pbx-invalid"
+>>>>>>> upstream/certified/13.8
 
 /*! Default pickup options */
 #define DEFAULT_PICKUPEXTEN                         "*8"

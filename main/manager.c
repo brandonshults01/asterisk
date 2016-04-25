@@ -3360,6 +3360,7 @@ static int action_getconfig(struct mansession *s, const struct message *m)
 
 		if (ast_category_is_template(cur_category)) {
 			astman_append(s, "IsTemplate-%06d: %d\r\n", catcount, 1);
+<<<<<<< HEAD
 		}
 
 		if ((templates = ast_category_get_templates(cur_category))
@@ -3368,6 +3369,16 @@ static int action_getconfig(struct mansession *s, const struct message *m)
 			ast_free(templates);
 		}
 
+=======
+		}
+
+		if ((templates = ast_category_get_templates(cur_category))
+			&& ast_str_strlen(templates) > 0) {
+			astman_append(s, "Templates-%06d: %s\r\n", catcount, ast_str_buffer(templates));
+			ast_free(templates);
+		}
+
+>>>>>>> upstream/certified/13.8
 		for (v = ast_category_first(cur_category); v; v = v->next) {
 			astman_append(s, "Line-%06d-%06d: %s=%s\r\n", catcount, lineno++, v->name, v->value);
 		}
@@ -3622,6 +3633,7 @@ static enum error_type handle_updates(struct mansession *s, const struct message
 						break;
 					}
 				}
+<<<<<<< HEAD
 			}
 
 			if (istemplate) {
@@ -3630,6 +3642,16 @@ static enum error_type handle_updates(struct mansession *s, const struct message
 				category = ast_category_new(cat, dfn, -1);
 			}
 
+=======
+			}
+
+			if (istemplate) {
+				category = ast_category_new_template(cat, dfn, -1);
+			} else {
+				category = ast_category_new(cat, dfn, -1);
+			}
+
+>>>>>>> upstream/certified/13.8
 			if (!category) {
 				result = FAILURE_ALLOCATION;
 				break;
@@ -4463,6 +4485,10 @@ static int action_status(struct mansession *s, const struct message *m)
 	const char *id = astman_get_header(m, "ActionID");
 	char *variables = ast_strdupa(S_OR(chan_variables, ""));
 	struct ast_channel *chan;
+<<<<<<< HEAD
+=======
+	struct ast_str *codec_buf = ast_str_alloca(AST_FORMAT_CAP_NAMES_LEN);
+>>>>>>> upstream/certified/13.8
 	int channels = 0;
 	int all = ast_strlen_zero(name); /* set if we want all channels */
 	char id_text[256];
@@ -4510,7 +4536,104 @@ static int action_status(struct mansession *s, const struct message *m)
 	for (; chan; all ? chan = ast_channel_iterator_next(it_chans) : 0) {
 		ast_channel_lock(chan);
 
+<<<<<<< HEAD
 		generate_status(s, chan, vars.name, vars.argc, all_variables, id_text, &channels);
+=======
+		now = ast_tvnow();
+		elapsed_seconds = ast_tvdiff_sec(now, ast_channel_creationtime(chan));
+
+		if (!ast_strlen_zero(chan_variables)) {
+			int i;
+			ast_str_reset(variable_str);
+			for (i = 0; i < vars.argc; i++) {
+				char valbuf[512], *ret = NULL;
+
+				if (vars.name[i][strlen(vars.name[i]) - 1] == ')') {
+					if (ast_func_read(chan, vars.name[i], valbuf, sizeof(valbuf)) < 0) {
+						valbuf[0] = '\0';
+					}
+					ret = valbuf;
+				} else {
+					pbx_retrieve_variable(chan, vars.name[i], &ret, valbuf, sizeof(valbuf), NULL);
+				}
+
+				ast_str_append(&variable_str, 0, "Variable: %s=%s\r\n", vars.name[i], ret);
+			}
+		}
+
+		channels++;
+
+		bridge = ast_channel_get_bridge(chan);
+
+		astman_append(s,
+			"Event: Status\r\n"
+			"Privilege: Call\r\n"
+			"Channel: %s\r\n"
+			"ChannelState: %u\r\n"
+			"ChannelStateDesc: %s\r\n"
+			"CallerIDNum: %s\r\n"
+			"CallerIDName: %s\r\n"
+			"ConnectedLineNum: %s\r\n"
+			"ConnectedLineName: %s\r\n"
+			"Accountcode: %s\r\n"
+			"Context: %s\r\n"
+			"Exten: %s\r\n"
+			"Priority: %d\r\n"
+			"Uniqueid: %s\r\n"
+			"Type: %s\r\n"
+			"DNID: %s\r\n"
+			"EffectiveConnectedLineNum: %s\r\n"
+			"EffectiveConnectedLineName: %s\r\n"
+			"TimeToHangup: %ld\r\n"
+			"BridgeID: %s\r\n"
+			"Linkedid: %s\r\n"
+			"Application: %s\r\n"
+			"Data: %s\r\n"
+			"Nativeformats: %s\r\n"
+			"Readformat: %s\r\n"
+			"Readtrans: %s\r\n"
+			"Writeformat: %s\r\n"
+			"Writetrans: %s\r\n"
+			"Callgroup: %llu\r\n"
+			"Pickupgroup: %llu\r\n"
+			"Seconds: %ld\r\n"
+			"%s"
+			"%s"
+			"\r\n",
+			ast_channel_name(chan),
+			ast_channel_state(chan),
+			ast_state2str(ast_channel_state(chan)),
+			S_COR(ast_channel_caller(chan)->id.number.valid, ast_channel_caller(chan)->id.number.str, "<unknown>"),
+			S_COR(ast_channel_caller(chan)->id.name.valid, ast_channel_caller(chan)->id.name.str, "<unknown>"),
+			S_COR(ast_channel_connected(chan)->id.number.valid, ast_channel_connected(chan)->id.number.str, "<unknown>"),
+			S_COR(ast_channel_connected(chan)->id.name.valid, ast_channel_connected(chan)->id.name.str, "<unknown>"),
+			ast_channel_accountcode(chan),
+			ast_channel_context(chan),
+			ast_channel_exten(chan),
+			ast_channel_priority(chan),
+			ast_channel_uniqueid(chan),
+			ast_channel_tech(chan)->type,
+			S_OR(ast_channel_dialed(chan)->number.str, ""),
+			S_COR(ast_channel_connected_effective_id(chan).number.valid, ast_channel_connected_effective_id(chan).number.str, "<unknown>"),
+			S_COR(ast_channel_connected_effective_id(chan).name.valid, ast_channel_connected_effective_id(chan).name.str, "<unknown>"),
+			(long)ast_channel_whentohangup(chan)->tv_sec,
+			bridge ? bridge->uniqueid : "",
+			ast_channel_linkedid(chan),
+			ast_channel_appl(chan),
+			ast_channel_data(chan),
+			ast_format_cap_get_names(ast_channel_nativeformats(chan), &codec_buf),
+			ast_format_get_name(ast_channel_readformat(chan)),
+			ast_translate_path_to_str(ast_channel_readtrans(chan), &read_transpath),
+			ast_format_get_name(ast_channel_writeformat(chan)),
+			ast_translate_path_to_str(ast_channel_writetrans(chan), &write_transpath),
+			ast_channel_callgroup(chan),
+			ast_channel_pickupgroup(chan),
+			(long)elapsed_seconds,
+			ast_str_buffer(variable_str),
+			id_text);
+
+		ao2_cleanup(bridge);
+>>>>>>> upstream/certified/13.8
 
 		ast_channel_unlock(chan);
 		chan = ast_channel_unref(chan);
@@ -4523,6 +4646,11 @@ static int action_status(struct mansession *s, const struct message *m)
 	astman_send_list_complete_start(s, m, "StatusComplete", channels);
 	astman_append(s, "Items: %d\r\n", channels);
 	astman_send_list_complete_end(s);
+<<<<<<< HEAD
+=======
+
+	ast_free(variable_str);
+>>>>>>> upstream/certified/13.8
 
 	return 0;
 }
@@ -6040,7 +6168,11 @@ static int manager_modulecheck(struct mansession *s, const struct message *m)
 	}
 	astman_append(s, "Response: Success\r\n%s", idText);
 #if !defined(LOW_MEMORY)
+<<<<<<< HEAD
 	astman_append(s, "Version: %s\r\n\r\n", "");
+=======
+	astman_append(s, "Version: %s\r\n\r\n", ast_get_version());
+>>>>>>> upstream/certified/13.8
 #endif
 	return 0;
 }

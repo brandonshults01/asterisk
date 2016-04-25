@@ -156,6 +156,7 @@ LINKER_SYMBOL_PREFIX=
 
 # Default install directory for DAHDI hooks.
 DAHDI_UDEV_HOOK_DIR = /usr/share/dahdi/span_config.d
+<<<<<<< HEAD
 
 # If the file .asterisk.makeopts is present in your home directory, you can
 # include all of your favorite menuselect options so that every time you download
@@ -171,6 +172,24 @@ else
 	GLOBAL_MAKEOPTS=
 endif
 
+=======
+
+# This Makefile previously contained a note about the ability to use .asterisk.makeopts
+# from your home directory or /etc/asterisk.makeopts to set defaults for menuselect.
+# These files have never worked in this branch of Asterisk.  The work around is to
+# manually copy the file containing defaults before running 'make menuselect':
+#
+# cp ${HOME}/.asterisk.makeopts menuselect.makeopts
+#   or
+# cp /etc/asterisk.makeopts menuselect.makeopts
+#
+# As an alternative, menuselect/menuselect can be used by a script to enable or disable
+# individual options or entire categories.  To use this feature you must first
+# compile menuselect using 'make menuselect.makeopts'.  For information about parameters
+# supported run:
+# menuselect/menuselect --help
+
+>>>>>>> upstream/certified/13.8
 
 MOD_SUBDIR_CFLAGS="-I$(ASTTOPDIR)/include"
 OTHER_SUBDIR_CFLAGS="-I$(ASTTOPDIR)/include"
@@ -341,10 +360,15 @@ makeopts: configure
 	@echo "****"
 	@exit 1
 
+<<<<<<< HEAD
 menuselect.makeopts: menuselect/menuselect menuselect-tree makeopts build_tools/menuselect-deps $(GLOBAL_MAKEOPTS) $(USER_MAKEOPTS)
 ifeq ($(filter %.menuselect,$(MAKECMDGOALS)),)
+=======
+menuselect.makeopts: menuselect/menuselect menuselect-tree makeopts build_tools/menuselect-deps
+ifeq ($(filter %menuselect,$(MAKECMDGOALS)),)
+>>>>>>> upstream/certified/13.8
 	menuselect/menuselect --check-deps $@
-	menuselect/menuselect --check-deps $@ $(GLOBAL_MAKEOPTS) $(USER_MAKEOPTS)
+	menuselect/menuselect --check-deps $@
 endif
 
 $(MOD_SUBDIRS_EMBED_LDSCRIPT):

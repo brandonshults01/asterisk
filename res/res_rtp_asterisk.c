@@ -1860,10 +1860,17 @@ static int dtls_srtp_handle_timeout(struct ast_rtp_instance *instance, int rtcp)
 	struct ast_rtp *rtp = ast_rtp_instance_get_data(instance);
 	struct dtls_details *dtls = !rtcp ? &rtp->dtls : &rtp->rtcp->dtls;
 	struct timeval dtls_timeout;
+<<<<<<< HEAD
 
 	DTLSv1_handle_timeout(dtls->ssl);
 	dtls_srtp_check_pending(instance, rtp, rtcp);
 
+=======
+
+	DTLSv1_handle_timeout(dtls->ssl);
+	dtls_srtp_check_pending(instance, rtp, rtcp);
+
+>>>>>>> upstream/certified/13.8
 	/* If a timeout can't be retrieved then this recurring scheduled item must stop */
 	if (!DTLSv1_get_timeout(dtls->ssl, &dtls_timeout)) {
 		dtls->timeout_timer = -1;
@@ -1891,9 +1898,15 @@ static int dtls_srtp_handle_rtcp_timeout(const void *data)
 {
 	struct ast_rtp_instance *instance = (struct ast_rtp_instance *)data;
 	int reschedule;
+<<<<<<< HEAD
 
 	reschedule = dtls_srtp_handle_timeout(instance, 1);
 
+=======
+
+	reschedule = dtls_srtp_handle_timeout(instance, 1);
+
+>>>>>>> upstream/certified/13.8
 	if (!reschedule) {
 		ao2_ref(instance, -1);
 	}

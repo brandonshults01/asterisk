@@ -540,6 +540,26 @@ char *ast_complete_source_filename(const char *partial, int n)
 	return res;
 }
 
+<<<<<<< HEAD
+=======
+const char *ast_file_version_find(const char *file)
+{
+	struct registered_file *iterator;
+
+	AST_RWLIST_RDLOCK(&registered_files);
+	AST_RWLIST_TRAVERSE(&registered_files, iterator, list) {
+		if (!strcasecmp(iterator->file, file)) {
+			break;
+		}
+	}
+	AST_RWLIST_UNLOCK(&registered_files);
+	if (iterator) {
+		return ast_get_version();
+	}
+	return NULL;
+}
+
+>>>>>>> upstream/certified/13.8
 struct thread_list_t {
 	AST_RWLIST_ENTRY(thread_list_t) list;
 	char *name;
@@ -1015,6 +1035,91 @@ static char *handle_clear_profile(struct ast_cli_entry *e, int cmd, struct ast_c
 }
 #undef DEFINE_PROFILE_MIN_MAX_VALUES
 
+<<<<<<< HEAD
+=======
+/*! \brief CLI command to list module versions */
+static char *handle_show_version_files(struct ast_cli_entry *e, int cmd, struct ast_cli_args *a)
+{
+#define FORMAT "%-25.25s %-40.40s\n"
+	struct registered_file *iterator;
+	regex_t regexbuf;
+	int havepattern = 0;
+	int havename = 0;
+	int count_files = 0;
+	char *ret = NULL;
+	int matchlen, which = 0;
+	struct registered_file *find;
+
+	switch (cmd) {
+	case CLI_INIT:
+		e->command = "core show file version [like]";
+		e->usage =
+			"Usage: core show file version [like <pattern>]\n"
+			"       Lists the files along with the Asterisk version.\n"
+			"       Optional regular expression pattern is used to filter the file list.\n";
+		return NULL;
+	case CLI_GENERATE:
+		matchlen = strlen(a->word);
+		if (a->pos != 3)
+			return NULL;
+		AST_RWLIST_RDLOCK(&registered_files);
+		AST_RWLIST_TRAVERSE(&registered_files, find, list) {
+			if (!strncasecmp(a->word, find->file, matchlen) && ++which > a->n) {
+				ret = ast_strdup(find->file);
+				break;
+			}
+		}
+		AST_RWLIST_UNLOCK(&registered_files);
+		return ret;
+	}
+
+
+	switch (a->argc) {
+	case 6:
+		if (!strcasecmp(a->argv[4], "like")) {
+			if (regcomp(&regexbuf, a->argv[5], REG_EXTENDED | REG_NOSUB))
+				return CLI_SHOWUSAGE;
+			havepattern = 1;
+		} else
+			return CLI_SHOWUSAGE;
+		break;
+	case 5:
+		havename = 1;
+		break;
+	case 4:
+		break;
+	default:
+		return CLI_SHOWUSAGE;
+	}
+
+	ast_cli(a->fd, FORMAT, "File", "Revision");
+	ast_cli(a->fd, FORMAT, "----", "--------");
+	AST_RWLIST_RDLOCK(&registered_files);
+	AST_RWLIST_TRAVERSE(&registered_files, iterator, list) {
+		if (havename && strcasecmp(iterator->file, a->argv[4]))
+			continue;
+
+		if (havepattern && regexec(&regexbuf, iterator->file, 0, NULL, 0))
+			continue;
+
+		ast_cli(a->fd, FORMAT, iterator->file, ast_get_version());
+		count_files++;
+		if (havename)
+			break;
+	}
+	AST_RWLIST_UNLOCK(&registered_files);
+	if (!havename) {
+		ast_cli(a->fd, "%d files listed.\n", count_files);
+	}
+
+	if (havepattern)
+		regfree(&regexbuf);
+
+	return CLI_SUCCESS;
+#undef FORMAT
+}
+
+>>>>>>> upstream/certified/13.8
 #endif /* ! LOW_MEMORY */
 
 static void publish_fully_booted(void)
@@ -3517,9 +3622,15 @@ static void ast_readconfig(void)
 			ast_set2_flag(&ast_options, ast_true(v->value), AST_OPT_FLAG_EXEC_INCLUDES);
 		/* debug level (-d at startup) */
 		} else if (!strcasecmp(v->name, "debug")) {
+<<<<<<< HEAD
 			option_debug_new = 0;
 			if (sscanf(v->value, "%30d", &option_debug_new) != 1) {
 				option_debug_new = ast_true(v->value) ? 1 : 0;
+=======
+			option_debug = 0;
+			if (sscanf(v->value, "%30d", &option_debug) != 1) {
+				option_debug = ast_true(v->value) ? 1 : 0;
+>>>>>>> upstream/certified/13.8
 			}
 		} else if (!strcasecmp(v->name, "refdebug")) {
 			ast_set2_flag(&ast_options, ast_true(v->value), AST_OPT_FLAG_REF_DEBUG);
@@ -3805,6 +3916,10 @@ int main(int argc, char *argv[])
 	int x;
 	int isroot = 1, rundir_exists = 0;
 	const char *runuser = NULL, *rungroup = NULL;
+<<<<<<< HEAD
+=======
+	char *remotesock = NULL;
+>>>>>>> upstream/certified/13.8
 	struct rlimit l;
 	static const char *getopt_settings = "BC:cde:FfG:ghIiL:M:mnpqRrs:TtU:VvWXx:";
 
@@ -3826,6 +3941,7 @@ int main(int argc, char *argv[])
 	}
 	ast_mainpid = getpid();
 
+<<<<<<< HEAD
 	/* Set config file to default before checking arguments for override. */
 	ast_copy_string(cfg_paths.config_file, DEFAULT_CONFIG_FILE, sizeof(cfg_paths.config_file));
 
@@ -3870,6 +3986,8 @@ int main(int argc, char *argv[])
 	/* Update env to include any systemname that was set. */
 	env_init();
 
+=======
+>>>>>>> upstream/certified/13.8
 	/*! \brief Check for options
 	 *
 	 * \todo Document these options
@@ -4538,11 +4656,14 @@ static void asterisk_daemon(int isroot, const char *runuser, const char *rungrou
 
 	if (ast_presence_state_engine_init()) {
 		printf("Failed: ast_presence_state_engine_init\n%s", term_quit());
+<<<<<<< HEAD
 		exit(1);
 	}
 
 	if (ast_dns_system_resolver_init()) {		/* Initialize the default DNS resolver */
 		printf("Failed: ast_dns_system_resolver_init\n%s", term_quit());
+=======
+>>>>>>> upstream/certified/13.8
 		exit(1);
 	}
 

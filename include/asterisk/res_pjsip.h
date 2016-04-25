@@ -241,6 +241,11 @@ struct ast_sip_contact {
 	double qualify_timeout;
 	/*! Endpoint that added the contact, only available in observers */
 	struct ast_sip_endpoint *endpoint;
+<<<<<<< HEAD
+=======
+	/*! The name of the aor this contact belongs to */
+	char *aor;
+>>>>>>> upstream/certified/13.8
 };
 
 #define CONTACT_STATUS "contact_status"
@@ -278,6 +283,13 @@ struct ast_sip_contact_status {
 	int64_t rtt;
 	/*! Last status for a contact (default - unavailable) */
 	enum ast_sip_contact_status_type last_status;
+<<<<<<< HEAD
+=======
+	/*! The name of the aor this contact_status belongs to */
+	char *aor;
+	/*! The original contact's URI */
+	char *uri;
+>>>>>>> upstream/certified/13.8
 };
 
 /*!
@@ -715,8 +727,13 @@ struct ast_sip_endpoint {
 	struct ast_variable *channel_vars;
 	/*! Whether to place a 'user=phone' parameter into the request URI if user is a number */
 	unsigned int usereqphone;
+<<<<<<< HEAD
 	/*! Whether to pass through hold and unhold using re-invites with recvonly and sendrecv */
 	unsigned int moh_passthrough;
+=======
+	/*! Do we send messages for connected line updates for unanswered incoming calls immediately to this endpoint? */
+	unsigned int rpid_immediate;
+>>>>>>> upstream/certified/13.8
 };
 
 /*!
@@ -794,6 +811,21 @@ struct ast_sip_outbound_authenticator {
 	 * \retval -1 Failed to create a new request
 	 */
 	int (*create_request_with_auth)(const struct ast_sip_auth_vector *auths, struct pjsip_rx_data *challenge,
+<<<<<<< HEAD
+=======
+			struct pjsip_transaction *tsx, struct pjsip_tx_data **new_request);
+	/*!
+	 * \brief Create a new request with authentication credentials based on old request
+	 *
+	 * \param auths A vector of IDs of auth sorcery objects
+	 * \param challenge The SIP response with authentication challenge(s)
+	 * \param old_request The request that resulted in challenge(s)
+	 * \param new_request The new SIP request with challenge response(s)
+	 * \retval 0 Successfully created new request
+	 * \retval -1 Failed to create a new request
+	 */
+	int (*create_request_with_auth_from_old)(const struct ast_sip_auth_vector *auths, struct pjsip_rx_data *challenge,
+>>>>>>> upstream/certified/13.8
 			struct pjsip_tx_data *old_request, struct pjsip_tx_data **new_request);
 };
 
@@ -1209,6 +1241,54 @@ struct ast_serializer_shutdown_group;
 struct ast_taskprocessor *ast_sip_create_serializer_group(const char *name, struct ast_serializer_shutdown_group *shutdown_group);
 
 /*!
+ * \brief Create a new serializer for SIP tasks
+ * \since 13.8.0
+ *
+ * See \ref ast_threadpool_serializer for more information on serializers.
+ * SIP creates serializers so that tasks operating on similar data will run
+ * in sequence.
+ *
+ * \param name Name of the serializer. (must be unique)
+ *
+ * \retval NULL Failure
+ * \retval non-NULL Newly-created serializer
+ */
+struct ast_taskprocessor *ast_sip_create_serializer_named(const char *name);
+
+struct ast_serializer_shutdown_group;
+
+/*!
+ * \brief Create a new serializer for SIP tasks
+ * \since 13.5.0
+ *
+ * See \ref ast_threadpool_serializer for more information on serializers.
+ * SIP creates serializers so that tasks operating on similar data will run
+ * in sequence.
+ *
+ * \param shutdown_group Group shutdown controller. (NULL if no group association)
+ *
+ * \retval NULL Failure
+ * \retval non-NULL Newly-created serializer
+ */
+struct ast_taskprocessor *ast_sip_create_serializer_group(struct ast_serializer_shutdown_group *shutdown_group);
+
+/*!
+ * \brief Create a new serializer for SIP tasks
+ * \since 13.8.0
+ *
+ * See \ref ast_threadpool_serializer for more information on serializers.
+ * SIP creates serializers so that tasks operating on similar data will run
+ * in sequence.
+ *
+ * \param name Name of the serializer. (must be unique)
+ * \param shutdown_group Group shutdown controller. (NULL if no group association)
+ *
+ * \retval NULL Failure
+ * \retval non-NULL Newly-created serializer
+ */
+struct ast_taskprocessor *ast_sip_create_serializer_group_named(const char *name, struct ast_serializer_shutdown_group *shutdown_group);
+
+/*!
  * \brief Set a serializer on a SIP dialog so requests and responses are automatically serialized
  *
  * Passing a NULL serializer is a way to remove a serializer from a dialog.
@@ -1523,6 +1603,17 @@ enum ast_sip_check_auth_result ast_sip_check_authentication(struct ast_sip_endpo
  */
 int ast_sip_create_request_with_auth(const struct ast_sip_auth_vector *auths, pjsip_rx_data *challenge,
 		pjsip_tx_data *tdata, pjsip_tx_data **new_request);
+
+/*!
+ * \brief Create a response to an authentication challenge
+ *
+ * This will call into an outbound authenticator's create_request_with_auth callback
+ * to create a new request with authentication credentials. See the create_request_with_auth_from_old
+ * callback in the \ref ast_sip_outbound_authenticator structure for details about
+ * the parameters and return values.
+ */
+int ast_sip_create_request_with_auth_from_old(const struct ast_sip_auth_vector *auths, pjsip_rx_data *challenge,
+		pjsip_tx_data *old_request, pjsip_tx_data **new_request);
 
 /*!
  * \brief Determine the endpoint that has sent a SIP message
@@ -2163,6 +2254,7 @@ const char *ast_sip_get_contact_status_label(const enum ast_sip_contact_status_t
 const char *ast_sip_get_contact_short_status_label(const enum ast_sip_contact_status_type status);
 
 /*!
+<<<<<<< HEAD
  * \brief Set a request to use the next value in the list of resolved addresses.
  *
  * \param tdata the tx data from the original request
@@ -2172,6 +2264,8 @@ const char *ast_sip_get_contact_short_status_label(const enum ast_sip_contact_st
 int ast_sip_failover_request(pjsip_tx_data *tdata);
 
 /*
+=======
+>>>>>>> upstream/certified/13.8
  * \brief Retrieve the local host address in IP form
  *
  * \param af The address family to retrieve
@@ -2247,4 +2341,17 @@ int ast_sip_set_tpselector_from_transport(const struct ast_sip_transport *transp
  */
 int ast_sip_set_tpselector_from_transport_name(const char *transport_name, pjsip_tpselector *selector);
 
+<<<<<<< HEAD
+=======
+/*!
+ * \brief Set name and number information on an identity header.
+ *
+ * \param pool Memory pool to use for string duplication
+ * \param id_hdr A From, P-Asserted-Identity, or Remote-Party-ID header to modify
+ * \param id The identity information to apply to the header
+ */
+void ast_sip_modify_id_header(pj_pool_t *pool, pjsip_fromto_hdr *id_hdr,
+	const struct ast_party_id *id);
+
+>>>>>>> upstream/certified/13.8
 #endif /* _RES_PJSIP_H */

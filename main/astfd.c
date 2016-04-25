@@ -56,7 +56,10 @@ static struct fdleaks {
 	char file[40];
 	char function[25];
 	char callargs[60];
+<<<<<<< HEAD
 	struct timeval now;
+=======
+>>>>>>> upstream/certified/13.8
 } fdleaks[1024] = { { "", }, };
 
 /* COPY does ast_copy_string(dst, src, sizeof(dst)), except:
@@ -82,7 +85,10 @@ static struct fdleaks {
 #define STORE_COMMON(offset, name, ...)     \
 	do { \
 		struct fdleaks *tmp = &fdleaks[offset]; \
+<<<<<<< HEAD
 		tmp->now = ast_tvnow(); \
+=======
+>>>>>>> upstream/certified/13.8
 		COPY(tmp->file, file);      \
 		tmp->line = line;           \
 		COPY(tmp->function, func);  \

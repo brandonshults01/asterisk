@@ -159,6 +159,7 @@ struct ast_sip_outbound_publish_state {
 	/* publish state id lookup key - same as publish configuration id */
 	char id[0];
 };
+<<<<<<< HEAD
 
 /*! \brief Unloading data */
 struct unloading_data {
@@ -224,6 +225,73 @@ static int outbound_publish_state_cmp(void *obj, void *arg, int flags)
 	return CMP_MATCH;
 }
 
+=======
+
+/*! \brief Unloading data */
+struct unloading_data {
+	int is_unloading;
+	int count;
+	ast_mutex_t lock;
+	ast_cond_t cond;
+} unloading;
+
+/*! \brief Default number of client state container buckets */
+#define DEFAULT_STATE_BUCKETS 31
+static AO2_GLOBAL_OBJ_STATIC(current_states);
+/*! \brief Used on [re]loads to hold new state data */
+static struct ao2_container *new_states;
+
+/*! \brief hashing function for state objects */
+static int outbound_publish_state_hash(const void *obj, const int flags)
+{
+	const struct ast_sip_outbound_publish_state *object;
+	const char *key;
+
+	switch (flags & OBJ_SEARCH_MASK) {
+	case OBJ_SEARCH_KEY:
+		key = obj;
+		break;
+	case OBJ_SEARCH_OBJECT:
+		object = obj;
+		key = object->id;
+		break;
+	default:
+		ast_assert(0);
+		return 0;
+	}
+	return ast_str_hash(key);
+}
+
+/*! \brief comparator function for client objects */
+static int outbound_publish_state_cmp(void *obj, void *arg, int flags)
+{
+	const struct ast_sip_outbound_publish_state *object_left = obj;
+	const struct ast_sip_outbound_publish_state *object_right = arg;
+	const char *right_key = arg;
+	int cmp;
+
+	switch (flags & OBJ_SEARCH_MASK) {
+	case OBJ_SEARCH_OBJECT:
+		right_key = object_right->id;
+		/* Fall through */
+	case OBJ_SEARCH_KEY:
+		cmp = strcmp(object_left->id, right_key);
+		break;
+	case OBJ_SEARCH_PARTIAL_KEY:
+		/* Not supported by container. */
+		ast_assert(0);
+		return 0;
+	default:
+		cmp = 0;
+		break;
+	}
+	if (cmp) {
+		return 0;
+	}
+	return CMP_MATCH;
+}
+
+>>>>>>> upstream/certified/13.8
 static struct ao2_container *get_publishes_and_update_state(void)
 {
 	struct ao2_container *container;
@@ -870,7 +938,11 @@ static void sip_outbound_publish_callback(struct pjsip_publishc_cbparam *param)
 		pjsip_transaction *tsx = pjsip_rdata_get_tsx(param->rdata);
 
 		if (!ast_sip_create_request_with_auth(&publish->outbound_auths,
+<<<<<<< HEAD
 				param->rdata, tsx->last_tx, &tdata)) {
+=======
+				param->rdata, pjsip_rdata_get_tsx(param->rdata), &tdata)) {
+>>>>>>> upstream/certified/13.8
 			pjsip_publishc_send(client->client, tdata);
 		}
 		client->auth_attempts++;

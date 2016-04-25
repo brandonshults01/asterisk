@@ -101,7 +101,11 @@ cleanup:
 	return res;
 }
 
+<<<<<<< HEAD
 static int digest_create_request_with_auth(const struct ast_sip_auth_vector *auths, pjsip_rx_data *challenge,
+=======
+static int digest_create_request_with_auth_from_old(const struct ast_sip_auth_vector *auths, pjsip_rx_data *challenge,
+>>>>>>> upstream/certified/13.8
 		pjsip_tx_data *old_request, pjsip_tx_data **new_request)
 {
 	pjsip_auth_clt_sess auth_sess;
@@ -150,8 +154,15 @@ static int digest_create_request_with_auth(const struct ast_sip_auth_vector *aut
 	return -1;
 }
 
+static int digest_create_request_with_auth(const struct ast_sip_auth_vector *auths, pjsip_rx_data *challenge,
+		pjsip_transaction *tsx, pjsip_tx_data **new_request)
+{
+	return digest_create_request_with_auth_from_old(auths, challenge, tsx->last_tx, new_request);
+}
+
 static struct ast_sip_outbound_authenticator digest_authenticator = {
 	.create_request_with_auth = digest_create_request_with_auth,
+	.create_request_with_auth_from_old = digest_create_request_with_auth_from_old,
 };
 
 static int load_module(void)

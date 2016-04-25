@@ -92,6 +92,10 @@ static void contact_destroy(void *obj)
 	struct ast_sip_contact *contact = obj;
 
 	ast_string_field_free_memory(contact);
+<<<<<<< HEAD
+=======
+	ast_free(contact->aor);
+>>>>>>> upstream/certified/13.8
 	ao2_cleanup(contact->endpoint);
 }
 
@@ -118,7 +122,15 @@ static void *contact_alloc(const char *name)
 	}
 	ast_assert(aor_separator != NULL);
 
+<<<<<<< HEAD
 	ast_string_field_set(contact, aor, aor);
+=======
+	contact->aor = ast_strdup(aor);
+	if (!contact->aor) {
+		ao2_cleanup(contact);
+		return NULL;
+	}
+>>>>>>> upstream/certified/13.8
 
 	return contact;
 }
@@ -204,10 +216,17 @@ void ast_sip_location_retrieve_contact_and_aor_from_list(const char *aor_list, s
 
 	*aor = NULL;
 	*contact = NULL;
+<<<<<<< HEAD
 
 	while ((aor_name = strsep(&rest, ","))) {
 		*aor = ast_sip_location_retrieve_aor(aor_name);
 
+=======
+
+	while ((aor_name = ast_strip(strsep(&rest, ",")))) {
+		*aor = ast_sip_location_retrieve_aor(aor_name);
+
+>>>>>>> upstream/certified/13.8
 		if (!(*aor)) {
 			continue;
 		}
@@ -377,11 +396,22 @@ static int permanent_uri_handler(const struct aco_option *opt, struct ast_variab
 	}
 
 	contacts = ast_strdupa(var->value);
+<<<<<<< HEAD
 	while ((contact_uri = strsep(&contacts, ","))) {
+=======
+	while ((contact_uri = ast_strip(strsep(&contacts, ",")))) {
+>>>>>>> upstream/certified/13.8
 		struct ast_sip_contact *contact;
 		struct ast_sip_contact_status *status;
 		char hash[33];
 		char contact_id[strlen(aor_id) + sizeof(hash) + 2];
+<<<<<<< HEAD
+=======
+
+		if (ast_strlen_zero(contact_uri)) {
+			continue;
+		}
+>>>>>>> upstream/certified/13.8
 
 		if (!aor->permanent_contacts) {
 			aor->permanent_contacts = ao2_container_alloc_list(AO2_ALLOC_OPT_LOCK_NOLOCK,
@@ -442,7 +472,7 @@ int ast_sip_for_each_aor(const char *aors, ao2_callback_fn on_aor, void *arg)
 	}
 
 	copy = ast_strdupa(aors);
-	while ((name = strsep(&copy, ","))) {
+	while ((name = ast_strip(strsep(&copy, ",")))) {
 		RAII_VAR(struct ast_sip_aor *, aor,
 			 ast_sip_location_retrieve_aor(name), ao2_cleanup);
 
@@ -454,7 +484,6 @@ int ast_sip_for_each_aor(const char *aors, ao2_callback_fn on_aor, void *arg)
 			return -1;
 		}
 	}
-	ast_free(copy);
 	return 0;
 }
 

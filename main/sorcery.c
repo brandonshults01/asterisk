@@ -935,6 +935,7 @@ int ast_sorcery_get_wizard_mapping(struct ast_sorcery *sorcery,
 /*! \brief Internal function removes a wizard mapping */
 int __ast_sorcery_remove_wizard_mapping(struct ast_sorcery *sorcery,
 		const char *type, const char *module, const char *name)
+<<<<<<< HEAD
 {
 	RAII_VAR(struct ast_sorcery_object_type *, object_type, ao2_find(sorcery->types, type, OBJ_KEY), ao2_cleanup);
 	int res;
@@ -958,6 +959,31 @@ enum ast_sorcery_apply_result __ast_sorcery_insert_wizard_mapping(struct ast_sor
 		unsigned int caching, int position)
 {
 	RAII_VAR(struct ast_sorcery_object_type *, object_type, ao2_find(sorcery->types, type, OBJ_KEY), ao2_cleanup);
+=======
+{
+	RAII_VAR(struct ast_sorcery_object_type *, object_type, ao2_find(sorcery->types, type, OBJ_KEY), ao2_cleanup);
+	int res;
+
+	if (!object_type) {
+		return -1;
+	}
+
+	AST_VECTOR_RW_WRLOCK(&object_type->wizards);
+#define WIZARD_NAME_COMPARE(a, b) (strcmp((a)->wizard->callbacks.name, (b)) == 0)
+	res = AST_VECTOR_REMOVE_CMP_ORDERED(&object_type->wizards, name, WIZARD_NAME_COMPARE, ao2_cleanup);
+#undef WIZARD_NAME_COMPARE
+	AST_VECTOR_RW_UNLOCK(&object_type->wizards);
+
+	return res;
+}
+
+/*! \brief Internal function which creates an object type and inserts a wizard mapping */
+enum ast_sorcery_apply_result __ast_sorcery_insert_wizard_mapping(struct ast_sorcery *sorcery,
+		const char *type, const char *module, const char *name, const char *data,
+		unsigned int caching, int position)
+{
+	RAII_VAR(struct ast_sorcery_object_type *, object_type, ao2_find(sorcery->types, type, OBJ_KEY), ao2_cleanup);
+>>>>>>> upstream/certified/13.8
 	RAII_VAR(struct ast_sorcery_internal_wizard *, wizard, ao2_find(wizards, name, OBJ_KEY), ao2_cleanup);
 	RAII_VAR(struct ast_sorcery_object_wizard *, object_wizard, ao2_alloc(sizeof(*object_wizard), sorcery_object_wizard_destructor), ao2_cleanup);
 	int created = 0;

@@ -30,8 +30,11 @@
 
 #include "asterisk.h"
 
+<<<<<<< HEAD
 ASTERISK_REGISTER_FILE()
 
+=======
+>>>>>>> upstream/certified/13.8
 #include "asterisk/module.h"
 #include "asterisk/sorcery.h"
 #include "asterisk/astobj2.h"

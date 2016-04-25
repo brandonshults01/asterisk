@@ -194,6 +194,27 @@ int ast_res_pjsip_init_contact_transports(void);
 
 /*!
  * \internal
+<<<<<<< HEAD
+=======
+ * \brief Initialize outbound authentication support
+ *
+ * \retval 0 Success
+ * \retval non-zero Failure
+ */
+int internal_sip_initialize_outbound_authentication(void);
+
+/*!
+ * \internal
+ * \brief Destroy outbound authentication support
+ *
+ * \retval 0 Success
+ * \retval non-zero Failure
+ */
+void internal_sip_destroy_outbound_authentication(void);
+
+/*!
+ * \internal
+>>>>>>> upstream/certified/13.8
  * \brief Initialize system configuration
  *
  * \retval 0 Success
@@ -215,12 +236,15 @@ void ast_sip_initialize_dns(void);
 
 /*!
  * \internal
+<<<<<<< HEAD
  * \brief Initialize our own resolver support
  */
 void ast_sip_initialize_resolver(void);
 
 /*!
  * \internal
+=======
+>>>>>>> upstream/certified/13.8
  * \brief Initialize global configuration
  *
  * \retval 0 Success

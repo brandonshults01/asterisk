@@ -39,6 +39,7 @@
 
 /*** MODULEINFO
 	<depend>pgsql</depend>
+	<defaultenabled>no</defaultenabled>
 	<support_level>extended</support_level>
  ***/
 
@@ -103,8 +104,13 @@ static AST_RWLIST_HEAD_STATIC(psql_columns, columns);
 #define LENGTHEN_BUF(size, var_sql) \
 	do { \
 		/* Lengthen buffer, if necessary */ \
+<<<<<<< HEAD
 		if (ast_str_strlen(var_sql) + size + 1 > ast_str_size(var_sql)) { \
 			if (ast_str_make_space(&var_sql, ((ast_str_size(var_sql) + size + 3) / 512 + 1) * 512) != 0) { \
+=======
+		if (ast_str_strlen(sql) + size + 1 > ast_str_size(sql)) { \
+			if (ast_str_make_space(&sql, ((ast_str_size(sql) + size + 3) / 512 + 1) * 512) != 0) { \
+>>>>>>> upstream/certified/13.8
 				ast_log(LOG_ERROR, "Unable to allocate sufficient memory.  Insert CEL '%s:%s' failed.\n", pghostname, table); \
 				ast_free(sql); \
 				ast_free(sql2); \
@@ -117,7 +123,21 @@ static AST_RWLIST_HEAD_STATIC(psql_columns, columns);
 #define LENGTHEN_BUF1(size) \
 	LENGTHEN_BUF(size, sql);
 #define LENGTHEN_BUF2(size) \
+<<<<<<< HEAD
 	LENGTHEN_BUF(size, sql2);
+=======
+	do { \
+		if (ast_str_strlen(sql2) + size + 1 > ast_str_size(sql2)) { \
+			if (ast_str_make_space(&sql2, ((ast_str_size(sql2) + size + 3) / 512 + 1) * 512) != 0) { \
+				ast_log(LOG_ERROR, "Unable to allocate sufficient memory.  Insert CEL '%s:%s' failed.\n", pghostname, table); \
+				ast_free(sql); \
+				ast_free(sql2); \
+				AST_RWLIST_UNLOCK(&psql_columns); \
+				return; \
+			} \
+		} \
+	} while (0)
+>>>>>>> upstream/certified/13.8
 
 static void pgsql_reconnect(void)
 {

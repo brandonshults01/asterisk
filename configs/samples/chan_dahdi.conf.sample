@@ -208,7 +208,11 @@ context=public
 ; response to call collisions (glare) and buggy peers.  However, there
 ; are telco switches out there that ignore the RESTART and continue to
 ; send calls to the channel in the restarting state.
+<<<<<<< HEAD
 ; Default no.
+=======
+; Default yes in current release branches for backward compatibility.
+>>>>>>> upstream/certified/13.8
 ;
 ;force_restart_unavailable_chans=yes
 ;

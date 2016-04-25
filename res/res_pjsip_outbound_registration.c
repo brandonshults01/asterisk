@@ -791,7 +791,11 @@ static int handle_registration_response(void *data)
 		pjsip_cseq_hdr *cseq_hdr;
 		pjsip_tx_data *tdata;
 
+<<<<<<< HEAD
 		if (!ast_sip_create_request_with_auth(&response->client_state->outbound_auths,
+=======
+		if (!ast_sip_create_request_with_auth_from_old(&response->client_state->outbound_auths,
+>>>>>>> upstream/certified/13.8
 				response->rdata, response->old_request, &tdata)) {
 			response->client_state->auth_attempted = 1;
 			ast_debug(1, "Sending authenticated REGISTER to server '%s' from client '%s'\n",
@@ -1005,7 +1009,11 @@ static struct sip_outbound_registration_state *sip_outbound_registration_state_a
 	ast_taskprocessor_build_name(tps_name, sizeof(tps_name), "pjsip/outreg/%s",
 		ast_sorcery_object_get_id(registration));
 
+<<<<<<< HEAD
 	state->client_state->serializer = ast_sip_create_serializer_group(tps_name,
+=======
+	state->client_state->serializer = ast_sip_create_serializer_group_named(tps_name,
+>>>>>>> upstream/certified/13.8
 		shutdown_group);
 	if (!state->client_state->serializer) {
 		ao2_cleanup(state);

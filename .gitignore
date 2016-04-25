@@ -33,4 +33,8 @@ menuselect-tree
 *.gcda
 latex
 doxygen.log
+<<<<<<< HEAD
+=======
+out/
+>>>>>>> upstream/certified/13.8
 

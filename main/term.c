@@ -176,6 +176,10 @@ end:
 		} else if (ast_opt_force_black_background) {
 			snprintf(enddata, sizeof(enddata), "%c[%d;%d;%dm", ESC, ATTR_RESET, COLOR_WHITE, COLOR_BLACK + 10);
 		} else {
+<<<<<<< HEAD
+=======
+			snprintf(prepdata, sizeof(prepdata), "%c[%d;%dm", ESC, ATTR_BRIGHT, COLOR_BROWN);
+>>>>>>> upstream/certified/13.8
 			snprintf(enddata, sizeof(enddata), "%c[%dm", ESC, ATTR_RESET);
 		}
 		snprintf(quitdata, sizeof(quitdata), "%c[%dm", ESC, ATTR_RESET);

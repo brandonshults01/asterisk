@@ -313,7 +313,11 @@ static struct ast_taskprocessor *create_websocket_serializer(void)
 	/* Create name with seq number appended. */
 	ast_taskprocessor_build_name(tps_name, sizeof(tps_name), "pjsip/websocket");
 
+<<<<<<< HEAD
 	return ast_sip_create_serializer(tps_name);
+=======
+	return ast_sip_create_serializer_named(tps_name);
+>>>>>>> upstream/certified/13.8
 }
 
 /*! \brief WebSocket connection handler. */

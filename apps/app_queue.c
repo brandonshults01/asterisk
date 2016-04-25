@@ -1022,9 +1022,12 @@ ASTERISK_REGISTER_FILE()
 				<parameter name="LastCall">
 					<para>The time this member last took a call, expressed in seconds since 00:00, Jan 1, 1970 UTC.</para>
 				</parameter>
+<<<<<<< HEAD
 				<parameter name="LastPause">
 					<para>The time when started last paused the queue member.</para>
 				</parameter>
+=======
+>>>>>>> upstream/certified/13.8
 				<parameter name="InCall">
 					<para>Set to 1 if member is in call. Set to 0 after LastCall time is updated.</para>
 					<enumlist>
@@ -1549,9 +1552,14 @@ struct member {
 	char reason_paused[80];              /*!< Reason of paused if member is paused */
 	int queuepos;                        /*!< In what order (pertains to certain strategies) should this member be called? */
 	time_t lastcall;                     /*!< When last successful call was hungup */
+<<<<<<< HEAD
 	time_t lastpause;                    /*!< When started the last pause */
 	unsigned int in_call:1;              /*!< True if member is still in call. (so lastcall is not actual) */
 	struct call_queue *lastqueue;        /*!< Last queue we received a call */
+=======
+	unsigned int in_call:1;              /*!< True if member is still in call. (so lastcall is not actual) */
+	struct call_queue *lastqueue;	     /*!< Last queue we received a call */
+>>>>>>> upstream/certified/13.8
 	unsigned int dead:1;                 /*!< Used to detect members deleted in realtime */
 	unsigned int delme:1;                /*!< Flag to delete entry on reload */
 	unsigned int call_pending:1;         /*!< TRUE if the Q is attempting to place a call to the member. */
@@ -1838,6 +1846,10 @@ static void queue_member_follower_removal(struct call_queue *queue, struct membe
 	ao2_callback(queue->members, OBJ_NODATA | OBJ_MULTIPLE, queue_member_decrement_followers, &pos);
 }
 
+<<<<<<< HEAD
+=======
+#ifdef REF_DEBUG
+>>>>>>> upstream/certified/13.8
 #define queue_ref(q)				_queue_ref(q, "", __FILE__, __LINE__, __PRETTY_FUNCTION__)
 #define queue_unref(q)				_queue_unref(q, "", __FILE__, __LINE__, __PRETTY_FUNCTION__)
 #define queue_t_ref(q, tag)			_queue_ref(q, tag, __FILE__, __LINE__, __PRETTY_FUNCTION__)
@@ -2188,7 +2200,11 @@ static void queue_publish_member_blob(struct stasis_message_type *type, struct a
 
 static struct ast_json *queue_member_blob_create(struct call_queue *q, struct member *mem)
 {
+<<<<<<< HEAD
 	return ast_json_pack("{s: s, s: s, s: s, s: s, s: s, s: i, s: i, s: i, s: i, s: i, s: i, s: i, s: s, s: i}",
+=======
+	return ast_json_pack("{s: s, s: s, s: s, s: s, s: s, s: i, s: i, s: i, s: i, s: i, s: i, s: s, s: i}",
+>>>>>>> upstream/certified/13.8
 		"Queue", q->name,
 		"MemberName", mem->membername,
 		"Interface", mem->interface,
@@ -2197,7 +2213,10 @@ static struct ast_json *queue_member_blob_create(struct call_queue *q, struct me
 		"Penalty", mem->penalty,
 		"CallsTaken", mem->calls,
 		"LastCall", (int)mem->lastcall,
+<<<<<<< HEAD
 		"LastPause", (int)mem->lastpause,
+=======
+>>>>>>> upstream/certified/13.8
 		"InCall", mem->in_call,
 		"Status", mem->status,
 		"Paused", mem->paused,
@@ -7151,7 +7170,10 @@ static void set_queue_member_pause(struct call_queue *q, struct member *mem, con
 		if (!ast_strlen_zero(reason)) {
 			ast_copy_string(mem->reason_paused, reason, sizeof(mem->reason_paused));
 		}
+<<<<<<< HEAD
 		time(&mem->lastpause); /* update last pause field */
+=======
+>>>>>>> upstream/certified/13.8
 	} else {
 		ast_copy_string(mem->reason_paused, "", sizeof(mem->reason_paused));
 	}
@@ -9328,6 +9350,7 @@ static char *__queues_show(struct mansession *s, int fd, int argc, const char * 
 
 				ast_str_append(&out, 0, " (ringinuse %s)", mem->ringinuse ? "enabled" : "disabled");
 
+<<<<<<< HEAD
 				ast_str_append(&out, 0, "%s%s%s%s%s%s%s%s%s",
 					mem->dynamic ? ast_term_color(COLOR_CYAN, COLOR_BLACK) : "", mem->dynamic ? " (dynamic)" : "", ast_term_reset(),
 					mem->realtime ? ast_term_color(COLOR_MAGENTA, COLOR_BLACK) : "", mem->realtime ? " (realtime)" : "", ast_term_reset(),
@@ -9343,6 +9366,13 @@ static char *__queues_show(struct mansession *s, int fd, int argc, const char * 
 				}
 
 				ast_str_append(&out, 0, " (%s%s%s)",
+=======
+				ast_str_append(&out, 0, "%s%s%s%s%s%s%s%s%s%s%s%s (%s%s%s)",
+					mem->dynamic ? ast_term_color(COLOR_CYAN, COLOR_BLACK) : "", mem->dynamic ? " (dynamic)" : "", ast_term_reset(),
+					mem->realtime ? ast_term_color(COLOR_MAGENTA, COLOR_BLACK) : "", mem->realtime ? " (realtime)" : "", ast_term_reset(),
+					mem->paused ? ast_term_color(COLOR_BROWN, COLOR_BLACK) : "", mem->paused ? " (paused)" : "", ast_term_reset(),
+					mem->in_call ? ast_term_color(COLOR_BROWN, COLOR_BLACK) : "", mem->in_call ? " (in call)" : "", ast_term_reset(),
+>>>>>>> upstream/certified/13.8
 					ast_term_color(
 						mem->status == AST_DEVICE_UNAVAILABLE || mem->status == AST_DEVICE_UNKNOWN ?
 							COLOR_RED : COLOR_GREEN, COLOR_BLACK),
@@ -9710,7 +9740,10 @@ static int manager_queues_status(struct mansession *s, const struct message *m)
 						"Penalty: %d\r\n"
 						"CallsTaken: %d\r\n"
 						"LastCall: %d\r\n"
+<<<<<<< HEAD
 						"LastPause: %d\r\n"
+=======
+>>>>>>> upstream/certified/13.8
 						"InCall: %d\r\n"
 						"Status: %d\r\n"
 						"Paused: %d\r\n"
@@ -9718,7 +9751,11 @@ static int manager_queues_status(struct mansession *s, const struct message *m)
 						"%s"
 						"\r\n",
 						q->name, mem->membername, mem->interface, mem->state_interface, mem->dynamic ? "dynamic" : "static",
+<<<<<<< HEAD
 						mem->penalty, mem->calls, (int)mem->lastcall, (int)mem->lastpause, mem->in_call, mem->status,
+=======
+						mem->penalty, mem->calls, (int)mem->lastcall, mem->in_call, mem->status,
+>>>>>>> upstream/certified/13.8
 						mem->paused, mem->reason_paused, idText);
 					++q_items;
 				}

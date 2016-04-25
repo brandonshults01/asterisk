@@ -907,7 +907,11 @@ int dahdi_native_load(const struct ast_channel_tech *tech)
 {
 	dahdi_tech = tech;
 
+<<<<<<< HEAD
 	if (ast_bridge_technology_register(&native_bridge)) {
+=======
+	if (__ast_bridge_technology_register(&native_bridge, mod)) {
+>>>>>>> upstream/certified/13.8
 		dahdi_native_unload();
 		return -1;
 	}

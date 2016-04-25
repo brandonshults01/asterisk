@@ -36,6 +36,24 @@ ael/ael.tab.o: _ASTCFLAGS+=-I. -Iael -DYYENABLE_NLS=0
 	ifneq ($(AST_CLANG_BLOCKS),)
 		_ASTCFLAGS+=-Wno-parentheses-equality
 	endif
+<<<<<<< HEAD
+=======
+
+$(if $(filter res_ais,$(EMBEDDED_MODS)),modules.link,res_ais.so): ais/clm.o ais/evt.o
+ais/clm.o ais/evt.o: _ASTCFLAGS+=$(call MOD_ASTCFLAGS,res_ais)
+
+$(if $(filter res_snmp,$(EMBEDDED_MODS)),modules.link,res_snmp.so): snmp/agent.o
+snmp/agent.o: _ASTCFLAGS+=$(call MOD_ASTCFLAGS,res_snmp)
+
+$(if $(filter res_ael_share,$(EMBEDDED_MODS)),modules.link,res_ael_share.so): ael/ael_lex.o ael/ael.tab.o ael/pval.o
+ael/ael_lex.o ael/ael.tab.o ael/pval.o: _ASTCFLAGS+=$(call MOD_ASTCFLAGS,res_ael_share)
+
+$(if $(filter res_pjsip,$(EMBEDDED_MODS)),modules.link,res_pjsip.so): $(subst .c,.o,$(wildcard res_pjsip/*.c))
+$(subst .c,.o,$(wildcard res_pjsip/*.c)): _ASTCFLAGS+=$(call MOD_ASTCFLAGS,res_pjsip)
+
+$(if $(filter res_stasis,$(EMBEDDED_MODS)),modules.link,res_stasis.so): $(subst .c,.o,$(wildcard stasis/*.c))
+$(subst .c,.o,$(wildcard stasis/*.c)): _ASTCFLAGS+=$(call MOD_ASTCFLAGS,res_stasis)
+>>>>>>> upstream/certified/13.8
 
 ifneq ($(findstring REBUILD_PARSERS,$(MENUSELECT_CFLAGS)),)
 ael/ael_lex.c: ael/ael.flex
@@ -60,6 +78,7 @@ endif
 
 ael/pval.o: ael/pval.c
 
+<<<<<<< HEAD
 $(call MOD_ADD_C,res_ael_share,ael/ael_lex.c ael/ael.tab.c ael/pval.c)
 $(call MOD_ADD_C,res_stasis,$(wildcard stasis/*.c))
 $(call MOD_ADD_C,res_snmp,snmp/agent.c)
@@ -68,6 +87,27 @@ $(call MOD_ADD_C,res_pjsip,$(wildcard res_pjsip/*.c))
 $(call MOD_ADD_C,res_ari,ari/cli.c ari/config.c ari/ari_websockets.c)
 $(call MOD_ADD_C,res_ari_model,ari/ari_model_validators.c)
 $(call MOD_ADD_C,res_stasis_recording,stasis_recording/stored.c)
+=======
+clean::
+	rm -f snmp/*.o snmp/*.i ael/*.o ael/*.i ais/*.o ais/*.i snmp/*.gcda snmp/*.gcno ael/*.gcda ael/*.gcno
+	rm -f res_pjsip/*.[oi] res_pjsip/*.gcda res_pjsip/*.gcno
+	rm -f stasis/*.[oi] stasis/*.gcda stasis/*.gcno
+	rm -f parking/*.[oi] parking/*.gcda parking/*.gcno
+	rm -f stasis_recording/*.[oi] stasis_recording/*.gcda stasis_recording/*.gcno
+	rm -f ari/*.[oi] ari/*.gcda ari/*.gcno
+
+$(if $(filter res_parking,$(EMBEDDED_MODS)),modules.link,res_parking.so): $(subst .c,.o,$(wildcard parking/*.c))
+$(subst .c,.o,$(wildcard parking/*.c)): _ASTCFLAGS+=$(call MOD_ASTCFLAGS,res_parking)
+
+res_ari.so: ari/cli.o ari/config.o ari/ari_websockets.o
+ari/cli.o ari/config.o ari/ari_websockets.o: _ASTCFLAGS+=$(call MOD_ASTCFLAGS,res_ari)
+
+res_ari_model.so: ari/ari_model_validators.o
+ari/ari_model_validators.o: _ASTCFLAGS+=$(call MOD_ASTCFLAGS,res_ari_model)
+
+res_stasis_recording.so: stasis_recording/stored.o
+stasis_recording/stored.o:  _ASTCFLAGS+=$(call MOD_ASTCFLAGS,res_stasis_recording)
+>>>>>>> upstream/certified/13.8
 
 # Dependencies for res_ari_*.so are generated, so they're in this file
 include ari.make

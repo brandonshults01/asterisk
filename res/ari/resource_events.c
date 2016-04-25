@@ -401,11 +401,38 @@ static int event_session_alloc(struct ast_tcptls_session_instance *ser,
 		return event_session_allocation_error_handler(session, ERROR_TYPE_OOM, ser);
 	}
 
+<<<<<<< HEAD
 	/* Register the apps with Stasis */
 	if (args->subscribe_all) {
 		register_handler = &stasis_app_register_all;
 	} else {
 		register_handler = &stasis_app_register;
+=======
+/*!
+ * \brief Callback handler for Stasis application messages.
+ */
+static void app_handler(void *data, const char *app_name,
+			struct ast_json *message)
+{
+	struct event_session *session = data;
+	int res;
+	const char *msg_type = S_OR(
+		ast_json_string_get(ast_json_object_get(message, "type")),
+		"");
+	const char *msg_application = S_OR(
+		ast_json_string_get(ast_json_object_get(message, "application")),
+		"");
+
+	if (!session) {
+		return;
+	}
+ 
+	/* Determine if we've been replaced */
+	if (strcmp(msg_type, "ApplicationReplaced") == 0 &&
+		strcmp(msg_application, app_name) == 0) {
+		ao2_find(session->websocket_apps, msg_application,
+			OBJ_UNLINK | OBJ_NODATA);
+>>>>>>> upstream/certified/13.8
 	}
 
 	for (i = 0; i < args->app_count; ++i) {
@@ -435,7 +462,19 @@ static int event_session_alloc(struct ast_tcptls_session_instance *ser,
 	return 0;
 }
 
+<<<<<<< HEAD
 static int event_session_shutdown_cb(void *session, void *arg, int flags)
+=======
+/*!
+ * \brief Register for all of the apps given.
+ * \param session Session info struct.
+ * \param app_name Name of application to register.
+ * \param register_handler Pointer to the application registration handler
+ */
+static int session_register_app(struct event_session *session,
+				 const char *app_name,
+				 int (* register_handler)(const char *, stasis_app_cb handler, void *data))
+>>>>>>> upstream/certified/13.8
 {
 	event_session_cleanup(session);
 
@@ -463,6 +502,7 @@ int ast_ari_websocket_events_event_websocket_init(void)
 		return -1;
 	}
 
+<<<<<<< HEAD
 	return 0;
 }
 
@@ -471,6 +511,62 @@ int ast_ari_websocket_events_event_websocket_attempted(
 		struct ast_ari_events_event_websocket_args *args, const char *session_id)
 {
 	ast_debug(3, "/events WebSocket attempted\n");
+=======
+	register_handler(app_name, app_handler, session);
+
+	return 0;
+}
+
+int ast_ari_websocket_events_event_websocket_attempted(struct ast_tcptls_session_instance *ser,
+	struct ast_variable *headers,
+	struct ast_ari_events_event_websocket_args *args)
+{
+	int res = 0;
+	size_t i, j;
+	int (* register_handler)(const char *, stasis_app_cb handler, void *data);
+
+	ast_debug(3, "/events WebSocket attempted\n");
+
+	if (args->app_count == 0) {
+		ast_http_error(ser, 400, "Bad Request", "Missing param 'app'");
+		return -1;
+	}
+
+	if (args->subscribe_all) {
+		register_handler = &stasis_app_register_all;
+	} else {
+		register_handler = &stasis_app_register;
+	}
+
+	for (i = 0; i < args->app_count; ++i) {
+		if (ast_strlen_zero(args->app[i])) {
+			res = -1;
+			break;
+		}
+
+		res |= register_handler(args->app[i], app_handler, NULL);
+	}
+
+	if (res) {
+		for (j = 0; j < i; ++j) {
+			stasis_app_unregister(args->app[j]);
+		}
+		ast_http_error(ser, 400, "Bad Request", "Invalid application provided in param 'app'.");
+	}
+
+	return res;
+}
+
+void ast_ari_websocket_events_event_websocket_established(struct ast_ari_websocket_session *ws_session,
+	struct ast_variable *headers,
+	struct ast_ari_events_event_websocket_args *args)
+{
+	RAII_VAR(struct event_session *, session, NULL, session_cleanup);
+	struct ast_json *msg;
+	int res;
+	size_t i;
+	int (* register_handler)(const char *, stasis_app_cb handler, void *data);
+>>>>>>> upstream/certified/13.8
 
 	/* Create the event session */
 	return event_session_alloc(ser, args, session_id);
@@ -482,8 +578,24 @@ void ast_ari_websocket_events_event_websocket_established(
 {
 	struct event_session *session;
 
+<<<<<<< HEAD
 	struct ast_json *msg;
 	const char *session_id;
+=======
+	if (args->subscribe_all) {
+		register_handler = &stasis_app_register_all;
+	} else {
+		register_handler = &stasis_app_register;
+	}
+
+	res = 0;
+	for (i = 0; i < args->app_count; ++i) {
+		if (ast_strlen_zero(args->app[i])) {
+			continue;
+		}
+		res |= session_register_app(session, args->app[i], register_handler);
+	}
+>>>>>>> upstream/certified/13.8
 
 	ast_debug(3, "/events WebSocket established\n");
 

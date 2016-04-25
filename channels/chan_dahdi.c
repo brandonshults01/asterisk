@@ -911,6 +911,7 @@ static struct dahdi_chan_conf dahdi_chan_conf_default(void)
 			.privateprefix = "",
 			.unknownprefix = "",
 			.colp_send = SIG_PRI_COLP_UPDATE,
+			.force_restart_unavailable_chans = 1,
 			.resetinterval = -1,
 		},
 #endif

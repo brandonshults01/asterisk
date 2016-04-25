@@ -70,7 +70,12 @@ static void contact_status_destroy(void * obj)
 {
 	struct ast_sip_contact_status *status = obj;
 
+<<<<<<< HEAD
 	ast_string_field_free_memory(status);
+=======
+	ast_free(status->aor);
+	ast_free(status->uri);
+>>>>>>> upstream/certified/13.8
 }
 
 /*!
@@ -89,20 +94,31 @@ static void *contact_status_alloc(const char *name)
 		return NULL;
 	}
 
+<<<<<<< HEAD
 	if (ast_string_field_init(status, 256)) {
 		ast_log(LOG_ERROR, "Unable to allocate ast_sip_contact_status stringfields\n");
 		ao2_cleanup(status);
 		return NULL;
 	}
 
+=======
+>>>>>>> upstream/certified/13.8
 	/* Dynamic contacts are delimited with ";@" and static ones with "@@" */
 	if ((aor_separator = strstr(id, ";@")) || (aor_separator = strstr(id, "@@"))) {
 		*aor_separator = '\0';
 	}
 	ast_assert(aor_separator != NULL);
 
+<<<<<<< HEAD
 	ast_string_field_set(status, aor, aor);
 	status->status = CREATED;
+=======
+	status->aor = ast_strdup(aor);
+	if (!status->aor) {
+		ao2_cleanup(status);
+		return NULL;
+	}
+>>>>>>> upstream/certified/13.8
 
 	return status;
 }
@@ -129,10 +145,22 @@ struct ast_sip_contact_status *ast_res_pjsip_find_or_create_contact_status(const
 	if (!status) {
 		ast_log(LOG_ERROR, "Unable to create ast_sip_contact_status for contact %s/%s\n",
 			contact->aor, contact->uri);
+<<<<<<< HEAD
 		return NULL;
 	}
 
 	ast_string_field_set(status, uri, contact->uri);
+=======
+		return NULL;
+	}
+
+	status->uri = ast_strdup(contact->uri);
+	if (!status->uri) {
+		ao2_cleanup(status);
+		return NULL;
+	}
+
+>>>>>>> upstream/certified/13.8
 	status->rtt_start = ast_tv(0, 0);
 	status->rtt = 0;
 
@@ -174,7 +202,15 @@ static void update_contact_status(const struct ast_sip_contact *contact,
 		return;
 	}
 
+<<<<<<< HEAD
 	ast_string_field_set(update, uri, contact->uri);
+=======
+	update->uri = ast_strdup(contact->uri);
+	if (!update->uri) {
+		return;
+	}
+
+>>>>>>> upstream/certified/13.8
 	update->last_status = status->status;
 	update->status = value;
 
@@ -223,7 +259,15 @@ static void init_start_time(const struct ast_sip_contact *contact)
 		return;
 	}
 
+<<<<<<< HEAD
 	ast_string_field_set(status, uri, contact->uri);
+=======
+	update->uri = ast_strdup(contact->uri);
+	if (!update->uri) {
+		return;
+	}
+
+>>>>>>> upstream/certified/13.8
 	update->status = status->status;
 	update->last_status = status->last_status;
 	update->rtt = status->rtt;
@@ -270,7 +314,11 @@ static int on_endpoint(void *obj, void *arg, int flags)
 	}
 
 	aors = ast_strdupa(endpoint->aors);
+<<<<<<< HEAD
 	while ((aor_name = strsep(&aors, ","))) {
+=======
+	while ((aor_name = ast_strip(strsep(&aors, ",")))) {
+>>>>>>> upstream/certified/13.8
 		struct ast_sip_aor *aor;
 		struct ao2_container *contacts;
 
@@ -795,7 +843,11 @@ static int cli_qualify_contacts(void *data)
 	}
 
 	aors = ast_strdupa(endpoint->aors);
+<<<<<<< HEAD
 	while ((aor_name = strsep(&aors, ","))) {
+=======
+	while ((aor_name = ast_strip(strsep(&aors, ",")))) {
+>>>>>>> upstream/certified/13.8
 		struct ast_sip_aor *aor;
 		struct ao2_container *contacts;
 
@@ -899,7 +951,11 @@ static int ami_sip_qualify(struct mansession *s, const struct message *m)
 	}
 
 	aors = ast_strdupa(endpoint->aors);
+<<<<<<< HEAD
 	while ((aor_name = strsep(&aors, ","))) {
+=======
+	while ((aor_name = ast_strip(strsep(&aors, ",")))) {
+>>>>>>> upstream/certified/13.8
 		struct ast_sip_aor *aor;
 		struct ao2_container *contacts;
 
@@ -1087,7 +1143,11 @@ static int qualify_and_schedule_all_cb(void *obj, void *arg, int flags)
 	}
 
 	aors = ast_strdupa(endpoint->aors);
+<<<<<<< HEAD
 	while ((aor_name = strsep(&aors, ","))) {
+=======
+	while ((aor_name = ast_strip(strsep(&aors, ",")))) {
+>>>>>>> upstream/certified/13.8
 		struct ast_sip_aor *aor;
 		struct ao2_container *contacts;
 
@@ -1264,7 +1324,11 @@ int ast_res_pjsip_init_options_handling(int reload)
 	}
 
 	internal_sip_register_endpoint_formatter(&contact_status_formatter);
+<<<<<<< HEAD
 	ast_manager_register_xml("PJSIPQualify", EVENT_FLAG_SYSTEM | EVENT_FLAG_REPORTING, ami_sip_qualify);
+=======
+	ast_manager_register2("PJSIPQualify", EVENT_FLAG_SYSTEM | EVENT_FLAG_REPORTING, ami_sip_qualify, NULL, NULL, NULL);
+>>>>>>> upstream/certified/13.8
 	ast_cli_register_multiple(cli_options, ARRAY_LEN(cli_options));
 
 	qualify_and_schedule_all();

@@ -21,8 +21,13 @@ int ast_register_cleanup(void (*func)(void))
 	return 0;
 }
 
+<<<<<<< HEAD
 int __ast_cli_register_multiple(struct ast_cli_entry *e, int len);
 int __ast_cli_register_multiple(struct ast_cli_entry *e, int len)
+=======
+int ast_cli_register_multiple(struct ast_cli_entry *e, int len);
+int ast_cli_register_multiple(struct ast_cli_entry *e, int len)
+>>>>>>> upstream/certified/13.8
 {
 	return 0;
 }

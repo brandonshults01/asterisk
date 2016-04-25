@@ -357,6 +357,13 @@ struct ast_module *__ast_module_ref(struct ast_module *mod, const char *file, in
 void __ast_module_shutdown_ref(struct ast_module *mod, const char *file, int line, const char *func);
 void __ast_module_unref(struct ast_module *mod, const char *file, int line, const char *func);
 
+<<<<<<< HEAD
+=======
+struct ast_module *__ast_module_ref(struct ast_module *mod, const char *file, int line, const char *func);
+void __ast_module_shutdown_ref(struct ast_module *mod, const char *file, int line, const char *func);
+void __ast_module_unref(struct ast_module *mod, const char *file, int line, const char *func);
+
+>>>>>>> upstream/certified/13.8
 /*!
  * \brief Hold a reference to the module
  * \param mod Module to reference

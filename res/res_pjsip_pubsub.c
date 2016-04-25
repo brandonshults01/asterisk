@@ -1245,7 +1245,11 @@ static struct sip_subscription_tree *allocate_subscription_tree(struct ast_sip_e
 	ast_taskprocessor_build_name(tps_name, sizeof(tps_name), "pjsip/pubsub/%s",
 		ast_sorcery_object_get_id(endpoint));
 
+<<<<<<< HEAD
 	sub_tree->serializer = ast_sip_create_serializer(tps_name);
+=======
+	sub_tree->serializer = ast_sip_create_serializer_named(tps_name);
+>>>>>>> upstream/certified/13.8
 	if (!sub_tree->serializer) {
 		ao2_ref(sub_tree, -1);
 		return NULL;
@@ -3340,12 +3344,21 @@ static int serialized_pubsub_on_rx_refresh(void *userdata)
 	if (!sub_tree->evsub) {
 		pjsip_dlg_dec_lock(dlg);
 		return 0;
+<<<<<<< HEAD
 	}
 
 	if (pjsip_evsub_get_state(sub_tree->evsub) == PJSIP_EVSUB_STATE_TERMINATED) {
 		set_state_terminated(sub_tree->root);
 	}
 
+=======
+	}
+
+	if (pjsip_evsub_get_state(sub_tree->evsub) == PJSIP_EVSUB_STATE_TERMINATED) {
+		set_state_terminated(sub_tree->root);
+	}
+
+>>>>>>> upstream/certified/13.8
 	send_notify(sub_tree, 1);
 
 	ast_test_suite_event_notify(sub_tree->root->subscription_state == PJSIP_EVSUB_STATE_TERMINATED ?
@@ -3654,7 +3667,11 @@ static int list_item_handler(const struct aco_option *opt,
 	char *items = ast_strdupa(var->value);
 	char *item;
 
-	while ((item = strsep(&items, ","))) {
+	while ((item = ast_strip(strsep(&items, ",")))) {
+		if (ast_strlen_zero(item)) {
+			continue;
+		}
+
 		if (item_in_vector(list, item)) {
 			ast_log(LOG_WARNING, "Ignoring duplicated list item '%s'\n", item);
 			continue;

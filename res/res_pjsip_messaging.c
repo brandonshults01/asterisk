@@ -762,7 +762,11 @@ static int load_module(void)
 		return AST_MODULE_LOAD_DECLINE;
 	}
 
+<<<<<<< HEAD
 	message_serializer = ast_sip_create_serializer("pjsip/messaging");
+=======
+	message_serializer = ast_sip_create_serializer_named("pjsip/messaging");
+>>>>>>> upstream/certified/13.8
 	if (!message_serializer) {
 		ast_sip_unregister_service(&messaging_module);
 		ast_msg_tech_unregister(&msg_tech);

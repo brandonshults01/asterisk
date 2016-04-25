@@ -1484,6 +1484,10 @@ struct ast_channel *__ast_channel_internal_alloc(void (*destructor)(void *obj), 
 		return NULL;
 	}
 
+	if (!tmp) {
+		return NULL;
+	}
+
 	if ((ast_string_field_init(tmp, 128))) {
 		return ast_channel_unref(tmp);
 	}

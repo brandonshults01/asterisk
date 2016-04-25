@@ -122,8 +122,15 @@ static int modules_loaded;
 
 struct ast_module {
 	const struct ast_module_info *info;
+<<<<<<< HEAD
 	/* Used to get module references into refs log */
 	void *ref_debug;
+=======
+#ifdef REF_DEBUG
+	/* Used to get module references into REF_DEBUG logs */
+	void *ref_debug;
+#endif
+>>>>>>> upstream/certified/13.8
 	void *lib;					/* the shared lib, or NULL if embedded */
 	int usecount;					/* the number of 'users' currently in this module */
 	struct module_user_list users;			/* the list of users in the module */
@@ -197,9 +204,15 @@ void ast_module_register(const struct ast_module_info *info)
 	ast_debug(5, "Registering module %s\n", info->name);
 
 	mod->info = info;
+<<<<<<< HEAD
 	if (ast_opt_ref_debug) {
 		mod->ref_debug = ao2_t_alloc(0, NULL, info->name);
 	}
+=======
+#ifdef REF_DEBUG
+	mod->ref_debug = ao2_t_alloc(0, NULL, info->name);
+#endif
+>>>>>>> upstream/certified/13.8
 	AST_LIST_HEAD_INIT(&mod->users);
 
 	/* during startup, before the loader has been initialized,
@@ -246,7 +259,13 @@ void ast_module_unregister(const struct ast_module_info *info)
 	if (mod) {
 		ast_debug(5, "Unregistering module %s\n", info->name);
 		AST_LIST_HEAD_DESTROY(&mod->users);
+<<<<<<< HEAD
 		ao2_cleanup(mod->ref_debug);
+=======
+#ifdef REF_DEBUG
+		ao2_cleanup(mod->ref_debug);
+#endif
+>>>>>>> upstream/certified/13.8
 		ast_free(mod);
 	}
 }
@@ -266,9 +285,15 @@ struct ast_module_user *__ast_module_user_add(struct ast_module *mod, struct ast
 	AST_LIST_INSERT_HEAD(&mod->users, u, entry);
 	AST_LIST_UNLOCK(&mod->users);
 
+<<<<<<< HEAD
 	if (mod->ref_debug) {
 		ao2_ref(mod->ref_debug, +1);
 	}
+=======
+#ifdef REF_DEBUG
+	ao2_ref(mod->ref_debug, +1);
+#endif
+>>>>>>> upstream/certified/13.8
 
 	ast_atomic_fetchadd_int(&mod->usecount, +1);
 
@@ -294,9 +319,15 @@ void __ast_module_user_remove(struct ast_module *mod, struct ast_module_user *u)
 		return;
 	}
 
+<<<<<<< HEAD
 	if (mod->ref_debug) {
 		ao2_ref(mod->ref_debug, -1);
 	}
+=======
+#ifdef REF_DEBUG
+	ao2_ref(mod->ref_debug, -1);
+#endif
+>>>>>>> upstream/certified/13.8
 
 	ast_atomic_fetchadd_int(&mod->usecount, -1);
 	ast_free(u);
@@ -314,9 +345,15 @@ void __ast_module_user_hangup_all(struct ast_module *mod)
 			ast_softhangup(u->chan, AST_SOFTHANGUP_APPUNLOAD);
 		}
 
+<<<<<<< HEAD
 		if (mod->ref_debug) {
 			ao2_ref(mod->ref_debug, -1);
 		}
+=======
+#ifdef REF_DEBUG
+		ao2_ref(mod->ref_debug, -1);
+#endif
+>>>>>>> upstream/certified/13.8
 
 		ast_atomic_fetchadd_int(&mod->usecount, -1);
 		ast_free(u);
@@ -641,8 +678,15 @@ void ast_module_shutdown(void)
 				mod->info->unload();
 			}
 			AST_LIST_HEAD_DESTROY(&mod->users);
+<<<<<<< HEAD
 			ao2_cleanup(mod->ref_debug);
 			ast_free(mod);
+=======
+#ifdef REF_DEBUG
+			ao2_cleanup(mod->ref_debug);
+#endif
+			free(mod);
+>>>>>>> upstream/certified/13.8
 			somethingchanged = 1;
 		}
 		AST_DLLIST_TRAVERSE_BACKWARDS_SAFE_END;
@@ -1603,9 +1647,15 @@ struct ast_module *__ast_module_ref(struct ast_module *mod, const char *file, in
 		return NULL;
 	}
 
+<<<<<<< HEAD
 	if (mod->ref_debug) {
 		__ao2_ref(mod->ref_debug, +1, "", file, line, func);
 	}
+=======
+#ifdef REF_DEBUG
+	__ao2_ref_debug(mod->ref_debug, +1, "", file, line, func);
+#endif
+>>>>>>> upstream/certified/13.8
 
 	ast_atomic_fetchadd_int(&mod->usecount, +1);
 	ast_update_use_count();
@@ -1629,9 +1679,15 @@ void __ast_module_unref(struct ast_module *mod, const char *file, int line, cons
 		return;
 	}
 
+<<<<<<< HEAD
 	if (mod->ref_debug) {
 		__ao2_ref(mod->ref_debug, -1, "", file, line, func);
 	}
+=======
+#ifdef REF_DEBUG
+	__ao2_ref_debug(mod->ref_debug, -1, "", file, line, func);
+#endif
+>>>>>>> upstream/certified/13.8
 
 	ast_atomic_fetchadd_int(&mod->usecount, -1);
 	ast_update_use_count();
@@ -1647,4 +1703,23 @@ const char *support_level_map [] = {
 const char *ast_module_support_level_to_string(enum ast_module_support_level support_level)
 {
 	return support_level_map[support_level];
+}
+
+
+
+/* The following exists for ABI compatibility */
+#undef ast_module_ref
+#undef ast_module_unref
+
+struct ast_module *ast_module_ref(struct ast_module *mod);
+void ast_module_unref(struct ast_module *mod);
+
+struct ast_module *ast_module_ref(struct ast_module *mod)
+{
+	return __ast_module_ref(mod, __FILE__, __LINE__, __PRETTY_FUNCTION__);
+}
+
+void ast_module_unref(struct ast_module *mod)
+{
+	__ast_module_unref(mod, __FILE__, __LINE__, __PRETTY_FUNCTION__);
 }

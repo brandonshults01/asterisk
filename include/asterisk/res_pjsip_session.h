@@ -81,10 +81,15 @@ struct ast_sip_session_media {
 	int keepalive_sched_id;
 	/*! \brief Scheduler ID for RTP timeout */
 	int timeout_sched_id;
+<<<<<<< HEAD
 	/*! \brief Stream is on hold by remote side */
 	unsigned int remotely_held:1;
 	/*! \brief Stream is on hold by local side */
 	unsigned int locally_held:1;
+=======
+	/*! \brief Stream is on hold */
+	unsigned int held:1;
+>>>>>>> upstream/certified/13.8
 	/*! \brief Stream type this session media handles */
 	char stream_type[1];
 };
@@ -151,6 +156,11 @@ struct ast_sip_session {
 	enum ast_sip_session_t38state t38state;
 	/*! The AOR associated with this session */
 	struct ast_sip_aor *aor;
+<<<<<<< HEAD
+=======
+	/*! From header saved at invite creation */
+	pjsip_fromto_hdr *saved_from_hdr;
+>>>>>>> upstream/certified/13.8
 };
 
 typedef int (*ast_sip_session_request_creation_cb)(struct ast_sip_session *session, pjsip_tx_data *tdata);

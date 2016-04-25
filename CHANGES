@@ -9,6 +9,7 @@
 ==============================================================================
 
 ------------------------------------------------------------------------------
+<<<<<<< HEAD
 --- Functionality changes from Asterisk 13 to Asterisk 14 --------------------
 ------------------------------------------------------------------------------
 
@@ -214,6 +215,15 @@ Queue
 ------------------------------------------------------------------------------
 --- Functionality changes from Asterisk 13.7.0 to Asterisk 13.8.0 ------------
 ------------------------------------------------------------------------------
+=======
+--- Functionality changes from Asterisk 13.7.0 to Asterisk 13.8.0 ------------
+------------------------------------------------------------------------------
+
+res_pjsip_caller_id
+------------------
+ * Per RFC3325, the 'From' header is now anonymized on outgoing calls when
+   caller id presentation is prohibited.
+>>>>>>> upstream/certified/13.8
 
 res_pjsip_config_wizard
 ------------------
@@ -338,6 +348,14 @@ Voicemail
    app_voicemail will be skipped.  Use 'preload=app_voicemail.so' in
    modules.conf to force app_voicemail to be the voicemail provider.
 
+<<<<<<< HEAD
+=======
+Queue
+-------------------
+ * Added field ReasonPause on QueueMemberStatus if set when paused, the reason
+   the queue member was paused.
+
+>>>>>>> upstream/certified/13.8
 res_pjsip_sdp_rtp
 ------------------
  * A new option (bind_rtp_to_media_address) has been added to endpoint which
@@ -386,6 +404,14 @@ Dialplan Functions
 
 res_pjsip_outbound_registration
 -------------------------------
+<<<<<<< HEAD
+=======
+ * A new 'fatal_retry_interval' option has been added to outbound registration.
+   When set (default is zero), and upon receiving a failure response to an
+   outbound registration, registration is retried at the given interval up to
+   'max_retries'.
+
+>>>>>>> upstream/certified/13.8
  * If res_statsd is loaded and a StatsD server is configured, basic statistics
    regarding the state of outbound registrations will now be emitted. This
    includes:
@@ -455,6 +481,10 @@ ARI
    ContactStatusChange. In particular, these events are useful when subscribing
    to all event sources, as they provide additional endpoint related
    information beyond the addition/removal of channels from an endpoint.
+<<<<<<< HEAD
+=======
+   The ARI version has been bumped to 1.9.0 as a result.
+>>>>>>> upstream/certified/13.8
 
  * Added the ability to subscribe to all ARI events in Asterisk, regardless
    of whether the application 'controls' the resource. This is useful for
@@ -528,12 +558,29 @@ chan_pjsip
  * The configuration setting 'progressinband' now defaults to 'no', which
    matches the actual behavior of previous versions.
 
+<<<<<<< HEAD
+=======
+ * New 'line' and 'endpoint' options added on outbound registrations. This allows some
+   identifying information to be added to the Contact of the outbound registration.
+   If this information is present on messages received from the remote server
+   the message will automatically be associated with the configured endpoint on the
+   outbound registration.
+
+>>>>>>> upstream/certified/13.8
 res_pjsip
 ------------------
  * A new CLI command has been added: "pjsip show settings", which shows
    both the global and system configuration settings.
 
+<<<<<<< HEAD
  * A new aor option has been added: "qualify_timeout", which sets the timeout
+=======
+ * A new global option has been added: "max_initial_qualify_time", which
+   sets the maximum amount of time from startup that qualifies should be
+   attempted on all contacts.
+
+* A new aor option has been added: "qualify_timeout", which sets the timeout
+>>>>>>> upstream/certified/13.8
    in seconds for a qualify.  The default is 3 seconds.  This overrides the
    hard coded 32 seconds in pjproject.
 
@@ -541,10 +588,13 @@ res_pjsip
    unavailable.  When any contact becomes available, the endpoint will status
    will change back to "Reachable".
 
+<<<<<<< HEAD
  * A new global option has been added: "max_initial_qualify_time", which
    sets the maximum amount of time from startup that qualifies should be
    attempted on all contacts.
 
+=======
+>>>>>>> upstream/certified/13.8
 res_ari_channels
 ------------------
  * Two new events, 'ChannelHold' and 'ChannelUnhold', have been added to the
@@ -588,9 +638,12 @@ res_pjsip
 --- Functionality changes from Asterisk 13.1.0 to Asterisk 13.2.0 ------------
 ------------------------------------------------------------------------------
 
+<<<<<<< HEAD
  * New 'PJSIP_AOR' and 'PJSIP_CONTACT' dialplan functions have been added which
    allow examining PJSIP AORs or contacts from the dialplan.
 
+=======
+>>>>>>> upstream/certified/13.8
 res_pjsip_outbound_registration
 ------------------
  * The 'pjsip send unregister' command now stops further registrations.
@@ -599,10 +652,29 @@ res_pjsip_outbound_registration
    start or restart periodic registration.  It can be used after a
    'send unregister' or after a 401 permanent error.
 
+<<<<<<< HEAD
 res_pjsip_config_wizard
 ------------------
  * This is a new module that adds streamlined configuration capability for
    chan_pjsip.  It's targeted at users who have lots of basic configuration
+=======
+chan_pjsip
+------------------
+ * New 'user_eq_phone' endpoint setting. This adds a 'user=phone' parameter
+   to the request URI and From URI if the user is determined to be a phone number.
+
+ * New global setting 'keep_alive_interval'. Setting this to a non-zero value
+   will cause keep alive messages to be sent periodically over connection
+   oriented transports.
+
+ * New 'PJSIP_AOR' and 'PJSIP_CONTACT' dialplan functions have been added which
+   allow examining PJSIP AORs or contacts from the dialplan.
+
+res_pjsip_config_wizard
+------------------
+ * This is a new module that adds streamlined configuration capability for
+   chan_pjsip.  It's targetted at users who have lots of basic configuration
+>>>>>>> upstream/certified/13.8
    scenarios like 'phone' or 'agent' or 'trunk'.  Additional information
    can be found in the sample configuration file at
    config/samples/pjsip_wizard.conf.sample.
@@ -653,20 +725,39 @@ AMI
  * Event NewConnectedLine is emitted when the connected line information on
    a channel changes.
 
+<<<<<<< HEAD
+=======
+ * The version of AMI has been bumped to 2.6.0 to account for the backwards
+   compatible feature listed above.
+
+>>>>>>> upstream/certified/13.8
 ARI
 ------------------
  * Event ChannelConnectedLine is emitted when the connected line information
    on a channel changes.
 
+<<<<<<< HEAD
+=======
+ * The version of ARI has been bumped to 1.6.0 to account for the backwards
+   compatible feature listed above.
+
+>>>>>>> upstream/certified/13.8
 Core Transfers
 -----------------
 
 The features.conf general section has three new configurable options:
     * transferdialattempts
+<<<<<<< HEAD
     * transferretrysound
     * transferinvalidsound
 For more information on what these options do, see the Asterisk wiki:
  https://wiki.asterisk.org/wiki/x/W4fAAQ
+=======
+	* transferretrysound
+	* transferinvalidsound
+For more information on what these options do, see the Asterisk wiki:
+	https://wiki.asterisk.org/wiki/x/W4fAAQ
+>>>>>>> upstream/certified/13.8
 
 Channel Drivers
 ------------------
@@ -726,7 +817,10 @@ included in Asterisk 13.
 Finally, all users upgrading to Asterisk 13 should read the UPGRADE.txt file
 delivered with this release.
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> upstream/certified/13.8
 Build System
 ------------------
  * Sample config files have been moved from configs/ to a sub-folder of that
@@ -735,6 +829,7 @@ Build System
  * The menuselect utility has been pulled into the Asterisk repository. As a
    result, the libxml2 development library is now a required dependency for
    Asterisk.
+<<<<<<< HEAD
 
  * A new Compiler Flag, REF_DEBUG, has been added. When enabled, reference
    counted objects will emit additional debug information to the refs log file
@@ -749,6 +844,22 @@ Build System
 Applications
 ------------------
 
+=======
+
+ * A new Compiler Flag, REF_DEBUG, has been added. When enabled, reference
+   counted objects will emit additional debug information to the refs log file
+   located in the standard Asterisk log file directory. This log file is useful
+   in tracking down object leaks and other reference counting issues. Prior to
+   this version, this option was only available by modifying the source code
+   directly. This change also includes a new script, refcounter.py, in the
+   contrib folder that will process the refs log file. Note that this replaces
+   the refcounter utility that could be built from the utils directory.
+
+
+Applications
+------------------
+
+>>>>>>> upstream/certified/13.8
 DahdiBarge
 ------------------
  * This module was deprecated and has been removed. Users of app_dahdibarge
@@ -949,7 +1060,11 @@ AMI
  * AMI action PJSIPNotify may now send to a URI instead of only to a PJSIP
    endpoint as long as a default outbound endpoint is set. This also applies
    to the equivalent CLI command (pjsip send notify)
+<<<<<<< HEAD
 
+=======
+ 
+>>>>>>> upstream/certified/13.8
  * The AMI action PJSIPShowEndpoint now includes ContactStatusDetail sections
    that give information on Asterisk's attempts to qualify the endpoint.
 

@@ -637,9 +637,12 @@
 				<configOption name="user_eq_phone" default="no">
 					<synopsis>Determines whether a user=phone parameter is placed into the request URI if the user is determined to be a phone number</synopsis>
 				</configOption>
+<<<<<<< HEAD
 				<configOption name="moh_passthrough" default="no">
 					<synopsis>Determines whether hold and unhold will be passed through using re-INVITEs with recvonly and sendrecv to the remote side</synopsis>
 				</configOption>
+=======
+>>>>>>> upstream/certified/13.8
 				<configOption name="sdp_owner" default="-">
 					<synopsis>String placed as the username portion of an SDP origin (o=) line.</synopsis>
 				</configOption>
@@ -806,8 +809,13 @@
 					<synopsis>Number of seconds between RTP comfort noise keepalive packets.</synopsis>
 					<description><para>
 						At the specified interval, Asterisk will send an RTP comfort noise frame. This may
+<<<<<<< HEAD
 						be useful for situations where Asterisk is behind a NAT or firewall and must keep
 						a hole open in order to allow for media to arrive at Asterisk.
+=======
+						be useful for situations where Asterisk is behind a NAT or firewall and must keep a
+						hole open in order to allow for media to arrive at Asterisk.
+>>>>>>> upstream/certified/13.8
 					</para></description>
 				</configOption>
 				<configOption name="rtp_timeout" default="0">
@@ -1710,9 +1718,12 @@
 				<parameter name="UserEqPhone">
 					<para><xi:include xpointer="xpointer(/docs/configInfo[@name='res_pjsip']/configFile[@name='pjsip.conf']/configObject[@name='endpoint']/configOption[@name='user_eq_phone']/synopsis/node())"/></para>
 				</parameter>
+<<<<<<< HEAD
 				<parameter name="MohPassthrough">
 					<para><xi:include xpointer="xpointer(/docs/configInfo[@name='res_pjsip']/configFile[@name='pjsip.conf']/configObject[@name='endpoint']/configOption[@name='moh_passthrough']/synopsis/node())"/></para>
 				</parameter>
+=======
+>>>>>>> upstream/certified/13.8
 				<parameter name="SdpOwner">
 					<para><xi:include xpointer="xpointer(/docs/configInfo[@name='res_pjsip']/configFile[@name='pjsip.conf']/configObject[@name='endpoint']/configOption[@name='sdp_owner']/synopsis/node())"/></para>
 				</parameter>
@@ -2101,6 +2112,16 @@ int ast_sip_create_request_with_auth(const struct ast_sip_auth_vector *auths, pj
 	return registered_outbound_authenticator->create_request_with_auth(auths, challenge, old_request, new_request);
 }
 
+int ast_sip_create_request_with_auth_from_old(const struct ast_sip_auth_vector *auths, pjsip_rx_data *challenge,
+		pjsip_tx_data *old_request, pjsip_tx_data **new_request)
+{
+	if (!registered_outbound_authenticator) {
+		ast_log(LOG_WARNING, "No SIP outbound authenticator registered. Cannot respond to authentication challenge\n");
+		return -1;
+	}
+	return registered_outbound_authenticator->create_request_with_auth_from_old(auths, challenge, old_request, new_request);
+}
+
 struct endpoint_identifier_list {
 	const char *name;
 	unsigned int priority;
@@ -2162,6 +2183,7 @@ int ast_sip_register_endpoint_identifier_with_name(struct ast_sip_endpoint_ident
 			id_list_item->priority = UINT_MAX;
 		}
 	}
+<<<<<<< HEAD
 
 	if (id_list_item->priority == UINT_MAX || AST_RWLIST_EMPTY(&endpoint_identifiers)) {
 		/* if not in the endpoint_identifier_order list then consider it less in
@@ -2172,6 +2194,18 @@ int ast_sip_register_endpoint_identifier_with_name(struct ast_sip_endpoint_ident
 		return 0;
 	}
 
+=======
+
+	if (id_list_item->priority == UINT_MAX || AST_RWLIST_EMPTY(&endpoint_identifiers)) {
+		/* if not in the endpoint_identifier_order list then consider it less in
+		   priority and add it to the end */
+		AST_RWLIST_INSERT_TAIL(&endpoint_identifiers, id_list_item, list);
+		ast_module_ref(ast_module_info->self);
+		ast_free(identifier_order);
+		return 0;
+	}
+
+>>>>>>> upstream/certified/13.8
 	AST_RWLIST_TRAVERSE_SAFE_BEGIN(&endpoint_identifiers, iter, list) {
 		if (id_list_item->priority < iter->priority) {
 			AST_RWLIST_INSERT_BEFORE_CURRENT(id_list_item, list);
@@ -3287,6 +3321,7 @@ static pj_status_t endpt_send_request(struct ast_sip_endpoint *endpoint,
 	return ret_val;
 }
 
+<<<<<<< HEAD
 int ast_sip_failover_request(pjsip_tx_data *tdata)
 {
 	pjsip_via_hdr *via;
@@ -3357,10 +3392,22 @@ static void send_request_cb(void *token, pjsip_event *e)
 	struct send_request_data *req_data = token;
 	pjsip_rx_data *challenge;
 	struct ast_sip_supplement *supplement;
+=======
+static void send_request_cb(void *token, pjsip_event *e)
+{
+	struct send_request_data *req_data = token;
+	pjsip_transaction *tsx;
+	pjsip_rx_data *challenge;
+	pjsip_tx_data *tdata;
+	struct ast_sip_supplement *supplement;
+	struct ast_sip_endpoint *endpoint;
+	int res;
+>>>>>>> upstream/certified/13.8
 
 	switch(e->body.tsx_state.type) {
 	case PJSIP_EVENT_TRANSPORT_ERROR:
 	case PJSIP_EVENT_TIMER:
+<<<<<<< HEAD
 		/*
 		 * Check the request status on transport error or timeout. A transport
 		 * error can occur when a TCP socket closes and that can be the result
@@ -3369,6 +3416,8 @@ static void send_request_cb(void *token, pjsip_event *e)
 		if (check_request_status(req_data, e)) {
 			return;
 		}
+=======
+>>>>>>> upstream/certified/13.8
 		break;
 	case PJSIP_EVENT_RX_MSG:
 		challenge = e->body.tsx_state.src.rdata;
@@ -3387,9 +3436,26 @@ static void send_request_cb(void *token, pjsip_event *e)
 		}
 		AST_RWLIST_UNLOCK(&supplements);
 
+<<<<<<< HEAD
 		if (check_request_status(req_data, e)) {
 			/*
 			 * Request with challenge response or failover sent.
+=======
+		/* Resend the request with a challenge response if we are challenged. */
+		tsx = e->body.tsx_state.tsx;
+		endpoint = ao2_bump(req_data->endpoint);
+		res = (tsx->status_code == 401 || tsx->status_code == 407)
+			&& endpoint
+			&& ++req_data->challenge_count < MAX_RX_CHALLENGES /* Not in a challenge loop */
+			&& !ast_sip_create_request_with_auth(&endpoint->outbound_auths,
+				challenge, tsx, &tdata)
+			&& endpt_send_request(endpoint, tdata, -1, req_data, send_request_cb)
+				== PJ_SUCCESS;
+		ao2_cleanup(endpoint);
+		if (res) {
+			/*
+			 * Request with challenge response sent.
+>>>>>>> upstream/certified/13.8
 			 * Passed our req_data ref to the new request.
 			 */
 			return;
@@ -3537,6 +3603,7 @@ int ast_sip_append_body(pjsip_tx_data *tdata, const char *body_text)
 	return 0;
 }
 
+<<<<<<< HEAD
 struct ast_taskprocessor *ast_sip_create_serializer_group(const char *name, struct ast_serializer_shutdown_group *shutdown_group)
 {
 	return ast_threadpool_serializer_group(name, sip_threadpool, shutdown_group);
@@ -3545,6 +3612,36 @@ struct ast_taskprocessor *ast_sip_create_serializer_group(const char *name, stru
 struct ast_taskprocessor *ast_sip_create_serializer(const char *name)
 {
 	return ast_sip_create_serializer_group(name, NULL);
+=======
+struct ast_taskprocessor *ast_sip_create_serializer_group_named(const char *name, struct ast_serializer_shutdown_group *shutdown_group)
+{
+	return ast_threadpool_serializer_group(name, sip_threadpool, shutdown_group);
+}
+
+struct ast_taskprocessor *ast_sip_create_serializer_group(struct ast_serializer_shutdown_group *shutdown_group)
+{
+	char tps_name[AST_TASKPROCESSOR_MAX_NAME + 1];
+
+	/* Create name with seq number appended. */
+	ast_taskprocessor_build_name(tps_name, sizeof(tps_name), "pjsip-group-serializer");
+
+	return ast_sip_create_serializer_group_named(tps_name, shutdown_group);
+}
+
+struct ast_taskprocessor *ast_sip_create_serializer_named(const char *name)
+{
+	return ast_sip_create_serializer_group_named(name, NULL);
+}
+
+struct ast_taskprocessor *ast_sip_create_serializer(void)
+{
+	char tps_name[AST_TASKPROCESSOR_MAX_NAME + 1];
+
+	/* Create name with seq number appended. */
+	ast_taskprocessor_build_name(tps_name, sizeof(tps_name), "pjsip-serializer");
+
+	return ast_sip_create_serializer_group_named(tps_name, NULL);
+>>>>>>> upstream/certified/13.8
 }
 
 /*!
@@ -3563,6 +3660,7 @@ static void serializer_pool_shutdown(void)
 		serializer_pool[idx] = NULL;
 	}
 }
+<<<<<<< HEAD
 
 /*!
  * \internal
@@ -3582,6 +3680,27 @@ static int serializer_pool_setup(void)
 		ast_taskprocessor_build_name(tps_name, sizeof(tps_name), "pjsip/default");
 
 		serializer_pool[idx] = ast_sip_create_serializer(tps_name);
+=======
+
+/*!
+ * \internal
+ * \brief Setup the serializers in the default pool.
+ * \since 14.0.0
+ *
+ * \retval 0 on success.
+ * \retval -1 on error.
+ */
+static int serializer_pool_setup(void)
+{
+	char tps_name[AST_TASKPROCESSOR_MAX_NAME + 1];
+	int idx;
+
+	for (idx = 0; idx < SERIALIZER_POOL_SIZE; ++idx) {
+		/* Create name with seq number appended. */
+		ast_taskprocessor_build_name(tps_name, sizeof(tps_name), "pjsip/default");
+
+		serializer_pool[idx] = ast_sip_create_serializer_named(tps_name);
+>>>>>>> upstream/certified/13.8
 		if (!serializer_pool[idx]) {
 			serializer_pool_shutdown();
 			return -1;
@@ -3898,6 +4017,38 @@ const char *ast_sip_get_host_ip_string(int af)
 	return NULL;
 }
 
+<<<<<<< HEAD
+=======
+/*!
+ * \brief Set name and number information on an identity header.
+ *
+ * \param pool Memory pool to use for string duplication
+ * \param id_hdr A From, P-Asserted-Identity, or Remote-Party-ID header to modify
+ * \param id The identity information to apply to the header
+ */
+void ast_sip_modify_id_header(pj_pool_t *pool, pjsip_fromto_hdr *id_hdr, const struct ast_party_id *id)
+{
+	pjsip_name_addr *id_name_addr;
+	pjsip_sip_uri *id_uri;
+
+	id_name_addr = (pjsip_name_addr *) id_hdr->uri;
+	id_uri = pjsip_uri_get_uri(id_name_addr->uri);
+
+	if (id->name.valid) {
+		int name_buf_len = strlen(id->name.str) * 2 + 1;
+		char *name_buf = ast_alloca(name_buf_len);
+
+		ast_escape_quoted(id->name.str, name_buf, name_buf_len);
+		pj_strdup2(pool, &id_name_addr->display, name_buf);
+	}
+
+	if (id->number.valid) {
+		pj_strdup2(pool, &id_uri->user, id->number.str);
+	}
+}
+
+
+>>>>>>> upstream/certified/13.8
 static void remove_request_headers(pjsip_endpoint *endpt)
 {
 	const pjsip_hdr *request_headers = pjsip_endpt_get_request_headers(endpt);
@@ -3986,6 +4137,10 @@ static int unload_pjsip(void *data)
 	 */
 	if (ast_pjsip_endpoint && serializer_pool[0]) {
 		ast_res_pjsip_cleanup_options_handling();
+<<<<<<< HEAD
+=======
+		internal_sip_destroy_outbound_authentication();
+>>>>>>> upstream/certified/13.8
 		ast_sip_destroy_distributor();
 		ast_res_pjsip_destroy_configuration();
 		ast_sip_destroy_system();
@@ -4001,6 +4156,7 @@ static int unload_pjsip(void *data)
 	if (memory_pool) {
 		pj_pool_release(memory_pool);
 		memory_pool = NULL;
+<<<<<<< HEAD
 	}
 
 	ast_pjsip_endpoint = NULL;
@@ -4009,6 +4165,16 @@ static int unload_pjsip(void *data)
 		pj_caching_pool_destroy(&caching_pool);
 	}
 
+=======
+	}
+
+	ast_pjsip_endpoint = NULL;
+
+	if (caching_pool.lock) {
+		pj_caching_pool_destroy(&caching_pool);
+	}
+
+>>>>>>> upstream/certified/13.8
 	pj_shutdown();
 
 	return 0;
@@ -4125,6 +4291,14 @@ static int load_module(void)
 	if (internal_sip_register_service(&supplement_module)) {
 		ast_log(LOG_ERROR, "Failed to initialize supplement hooks. Aborting load\n");
 		goto error;
+<<<<<<< HEAD
+=======
+	}
+
+	if (internal_sip_initialize_outbound_authentication()) {
+		ast_log(LOG_ERROR, "Failed to initialize outbound authentication. Aborting load\n");
+		goto error;
+>>>>>>> upstream/certified/13.8
 	}
 
 	ast_res_pjsip_init_options_handling(0);

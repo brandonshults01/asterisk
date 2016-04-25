@@ -27,7 +27,15 @@ all: _all
 
 include $(ASTTOPDIR)/Makefile.moddir_rules
 
+<<<<<<< HEAD
 $(call MOD_ADD_C,app_confbridge,$(wildcard confbridge/*.c))
+=======
+clean::
+	rm -f confbridge/*.o confbridge/*.i confbridge/*.gcda confbridge/*.gcno
+
+$(if $(filter app_confbridge,$(EMBEDDED_MODS)),modules.link,app_confbridge.so): $(subst .c,.o,$(wildcard confbridge/*.c))
+$(subst .c,.o,$(wildcard confbridge/*.c)): _ASTCFLAGS+=$(call MOD_ASTCFLAGS,app_confbridge)
+>>>>>>> upstream/certified/13.8
 
 ifneq ($(findstring $(OSARCH), mingw32 cygwin ),)
   LIBS+= -lres_ael_share.so -lres_monitor.so -lres_speech.so

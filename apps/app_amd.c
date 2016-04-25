@@ -38,6 +38,7 @@
  */
 
 /*** MODULEINFO
+	<defaultenabled>no</defaultenabled>
 	<support_level>extended</support_level>
  ***/
 
@@ -85,7 +86,11 @@ ASTERISK_REGISTER_FILE()
 			</parameter>
 			<parameter name="maximumNumberOfWords" required="false">
 				<para>Is the maximum number of words in a greeting</para>
+<<<<<<< HEAD
 				<para>If this is exceeded, then the result is detection as a MACHINE</para>
+=======
+				<para>If this is REACHED, then the result is detection as a MACHINE</para>
+>>>>>>> upstream/certified/13.8
 			</parameter>
 			<parameter name="silenceThreshold" required="false">
 				<para>What is the average level of noise from 0 to 32767 which if not exceeded, should be considered silence?</para>

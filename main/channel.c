@@ -4156,6 +4156,7 @@ static struct ast_frame *__ast_read(struct ast_channel *chan, int dropaudio)
 				core_format = ast_channel_readformat(chan);
 				if (!ast_format_cache_is_slinear(core_format)) {
 					core_format = f->subclass.format;
+<<<<<<< HEAD
 				}
 				if (ast_set_read_format_path(chan, f->subclass.format, core_format)) {
 					/* Drop frame.  We couldn't make it compatible with the core. */
@@ -4172,6 +4173,24 @@ static struct ast_frame *__ast_read(struct ast_channel *chan, int dropaudio)
 				if (old_frame != f) {
 					ast_frfree(old_frame);
 				}
+=======
+				}
+				if (ast_set_read_format_path(chan, f->subclass.format, core_format)) {
+					/* Drop frame.  We couldn't make it compatible with the core. */
+					ast_frfree(f);
+					f = &ast_null_frame;
+					break;
+				}
+			}
+			/* Send frame to audiohooks if present */
+			if (ast_channel_audiohooks(chan)) {
+				struct ast_frame *old_frame = f;
+
+				f = ast_audiohook_write_list(chan, ast_channel_audiohooks(chan), AST_AUDIOHOOK_DIRECTION_READ, f);
+				if (old_frame != f) {
+					ast_frfree(old_frame);
+				}
+>>>>>>> upstream/certified/13.8
 			}
 			if (ast_channel_monitor(chan) && ast_channel_monitor(chan)->read_stream) {
 				/* XXX what does this do ? */

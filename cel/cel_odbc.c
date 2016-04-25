@@ -641,7 +641,11 @@ static void odbc_log(struct ast_event *event)
 
 						ast_str_append(&sql, 0, "%s%s", separator, entry->name);
 						LENGTHEN_BUF2(27);
+<<<<<<< HEAD
 						ast_str_append(&sql2, 0, "%s{ts '%04d-%02d-%02d %02d:%02d:%02d.%d'}", separator, year, month, day, hour, minute, second, fraction);
+=======
+						ast_str_append(&sql2, 0, "%s{ts '%04d-%02d-%02d %02d:%02d:%02d.%d'}", first ? "" : ",", year, month, day, hour, minute, second, fraction);
+>>>>>>> upstream/certified/13.8
 					}
 					break;
 				case SQL_INTEGER:

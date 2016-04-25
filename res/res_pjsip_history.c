@@ -27,12 +27,20 @@
 /*** MODULEINFO
 	<depend>pjproject</depend>
 	<depend>res_pjsip</depend>
+<<<<<<< HEAD
+=======
+	<defaultenabled>no</defaultenabled>
+>>>>>>> upstream/certified/13.8
 	<support_level>extended</support_level>
  ***/
 
 #include "asterisk.h"
 
+<<<<<<< HEAD
 ASTERISK_REGISTER_FILE()
+=======
+ASTERISK_FILE_VERSION(__FILE__, "$Revision$")
+>>>>>>> upstream/certified/13.8
 
 #include <pjsip.h>
 #include <regex.h>

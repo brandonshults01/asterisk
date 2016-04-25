@@ -39,6 +39,7 @@
 
 /*** MODULEINFO
 	<depend>res_odbc</depend>
+	<defaultenabled>no</defaultenabled>
 	<support_level>extended</support_level>
  ***/
 
@@ -90,7 +91,11 @@ static SQLHSTMT execute_cb(struct odbc_obj *obj, void *data)
 		snprintf(sqlcmd,sizeof(sqlcmd),"INSERT INTO %s "
 		"(calldate,clid,src,dst,dcontext,channel,dstchannel,lastapp,"
 		"lastdata,duration,billsec,disposition,amaflags,accountcode,uniqueid,userfield%s) "
+<<<<<<< HEAD
 		"VALUES ({ts '%s'},?,?,?,?,?,?,?,?,?,?,?,?,?,?,?%s)", table, new_columns, timestr, new_values);
+=======
+		"VALUES ({ts '%s'},?,?,?,?,?,?,?,?,?,?,?,?,?,?,? %s)", table, new_columns, timestr, new_values);
+>>>>>>> upstream/certified/13.8
 	} else {
 		snprintf(sqlcmd,sizeof(sqlcmd),"INSERT INTO %s "
 		"(calldate,clid,src,dst,dcontext,channel,dstchannel,lastapp,lastdata,"
@@ -277,10 +282,17 @@ static int odbc_load_module(int reload)
 		}
 		if (((tmp = ast_variable_retrieve(cfg, "global", "newcdrcolumns"))) && ast_true(tmp)) {
 			ast_set_flag(&config, CONFIG_NEWCDRCOLUMNS);
+<<<<<<< HEAD
 			ast_debug(1, "cdr_odbc: Add new cdr columns\n");
 		} else {
 			ast_clear_flag(&config, CONFIG_NEWCDRCOLUMNS);
 			ast_debug(1, "cdr_odbc: Not add new cdr columns\n");
+=======
+			ast_debug(1, "cdr_odbc: Add new cdr fields\n");
+		} else {
+			ast_clear_flag(&config, CONFIG_NEWCDRCOLUMNS);
+			ast_debug(1, "cdr_odbc: Not add new cdr fields\n");
+>>>>>>> upstream/certified/13.8
 		}
 	} while (0);
 

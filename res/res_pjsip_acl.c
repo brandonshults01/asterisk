@@ -238,10 +238,13 @@ static int acl_handler(const struct aco_option *opt, struct ast_variable *var, v
 
 	if (!strncmp(var->name, "contact_", 8)) {
 		ast_append_acl(var->name + 8, var->value, &sip_acl->contact_acl, &error, &ignore);
+<<<<<<< HEAD
 		if (error) {
 			ast_log(LOG_ERROR, "Bad contact ACL '%s' at line '%d' of pjsip.conf\n",
 					var->value, var->lineno);
 		}
+=======
+>>>>>>> upstream/certified/13.8
 	} else {
 		ast_append_acl(var->name, var->value, &sip_acl->acl, &error, &ignore);
 		if (error) {

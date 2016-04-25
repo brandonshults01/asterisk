@@ -223,6 +223,7 @@ static void chan_pjsip_get_codec(struct ast_channel *chan, struct ast_format_cap
 	ast_format_cap_append_from_cap(result, channel->session->endpoint->media.codecs, AST_MEDIA_TYPE_UNKNOWN);
 }
 
+<<<<<<< HEAD
 static int send_direct_media_request(void *data)
 {
 	struct ast_sip_session *session = data;
@@ -234,6 +235,8 @@ static int send_direct_media_request(void *data)
 	return res;
 }
 
+=======
+>>>>>>> upstream/certified/13.8
 /*! \brief Destructor function for \ref transport_info_data */
 static void transport_info_destroy(void *obj)
 {
@@ -302,6 +305,84 @@ static int check_for_rtp_changes(struct ast_channel *chan, struct ast_rtp_instan
 	return changed;
 }
 
+struct rtp_direct_media_data {
+	struct ast_channel *chan;
+	struct ast_rtp_instance *rtp;
+	struct ast_rtp_instance *vrtp;
+	struct ast_format_cap *cap;
+	struct ast_sip_session *session;
+};
+
+static void rtp_direct_media_data_destroy(void *data)
+{
+	struct rtp_direct_media_data *cdata = data;
+
+	ao2_cleanup(cdata->session);
+	ao2_cleanup(cdata->cap);
+	ao2_cleanup(cdata->vrtp);
+	ao2_cleanup(cdata->rtp);
+	ao2_cleanup(cdata->chan);
+}
+
+static struct rtp_direct_media_data *rtp_direct_media_data_create(
+	struct ast_channel *chan, struct ast_rtp_instance *rtp, struct ast_rtp_instance *vrtp,
+	const struct ast_format_cap *cap, struct ast_sip_session *session)
+{
+	struct rtp_direct_media_data *cdata = ao2_alloc(sizeof(*cdata), rtp_direct_media_data_destroy);
+
+	if (!cdata) {
+		return NULL;
+	}
+
+	cdata->chan = ao2_bump(chan);
+	cdata->rtp = ao2_bump(rtp);
+	cdata->vrtp = ao2_bump(vrtp);
+	cdata->cap = ao2_bump((struct ast_format_cap *)cap);
+	cdata->session = ao2_bump(session);
+
+	return cdata;
+}
+
+static int send_direct_media_request(void *data)
+{
+	struct rtp_direct_media_data *cdata = data;
+	struct ast_sip_channel_pvt *channel = ast_channel_tech_pvt(cdata->chan);
+	struct chan_pjsip_pvt *pvt = channel->pvt;
+	int changed = 0;
+	int res = 0;
+
+	if (pvt->media[SIP_MEDIA_AUDIO]) {
+		changed |= check_for_rtp_changes(
+			cdata->chan, cdata->rtp, pvt->media[SIP_MEDIA_AUDIO], 1);
+	}
+	if (pvt->media[SIP_MEDIA_VIDEO]) {
+		changed |= check_for_rtp_changes(
+			cdata->chan, cdata->vrtp, pvt->media[SIP_MEDIA_VIDEO], 3);
+	}
+
+	if (direct_media_mitigate_glare(cdata->session)) {
+		ast_debug(4, "Disregarding setting RTP on %s: mitigating re-INVITE glare\n", ast_channel_name(cdata->chan));
+		ao2_ref(cdata, -1);
+		return 0;
+	}
+
+	if (cdata->cap && ast_format_cap_count(cdata->cap) &&
+	    !ast_format_cap_identical(cdata->session->direct_media_cap, cdata->cap)) {
+		ast_format_cap_remove_by_type(cdata->session->direct_media_cap, AST_MEDIA_TYPE_UNKNOWN);
+		ast_format_cap_append_from_cap(cdata->session->direct_media_cap, cdata->cap, AST_MEDIA_TYPE_UNKNOWN);
+		changed = 1;
+	}
+
+	if (changed) {
+		ast_debug(4, "RTP changed on %s; initiating direct media update\n", ast_channel_name(cdata->chan));
+		res = ast_sip_session_refresh(cdata->session, NULL, NULL, NULL,
+			cdata->session->endpoint->media.direct_media.method, 1);
+	}
+
+	ao2_ref(cdata, -1);
+	return res;
+}
+
 /*! \brief Function called by RTP engine to change where the remote party should send media */
 static int chan_pjsip_set_rtp_peer(struct ast_channel *chan,
 		struct ast_rtp_instance *rtp,
@@ -311,9 +392,8 @@ static int chan_pjsip_set_rtp_peer(struct ast_channel *chan,
 		int nat_active)
 {
 	struct ast_sip_channel_pvt *channel = ast_channel_tech_pvt(chan);
-	struct chan_pjsip_pvt *pvt = channel->pvt;
 	struct ast_sip_session *session = channel->session;
-	int changed = 0;
+	struct rtp_direct_media_data *cdata;
 
 	/* Don't try to do any direct media shenanigans on early bridges */
 	if ((rtp || vrtp || tpeer) && !ast_channel_is_bridged(chan)) {
@@ -326,31 +406,14 @@ static int chan_pjsip_set_rtp_peer(struct ast_channel *chan,
 		return 0;
 	}
 
-	if (pvt->media[SIP_MEDIA_AUDIO]) {
-		changed |= check_for_rtp_changes(chan, rtp, pvt->media[SIP_MEDIA_AUDIO], 1);
-	}
-	if (pvt->media[SIP_MEDIA_VIDEO]) {
-		changed |= check_for_rtp_changes(chan, vrtp, pvt->media[SIP_MEDIA_VIDEO], 3);
-	}
-
-	if (direct_media_mitigate_glare(session)) {
-		ast_debug(4, "Disregarding setting RTP on %s: mitigating re-INVITE glare\n", ast_channel_name(chan));
+	cdata = rtp_direct_media_data_create(chan, rtp, vrtp, cap, session);
+	if (!cdata) {
 		return 0;
 	}
 
-	if (cap && ast_format_cap_count(cap) && !ast_format_cap_identical(session->direct_media_cap, cap)) {
-		ast_format_cap_remove_by_type(session->direct_media_cap, AST_MEDIA_TYPE_UNKNOWN);
-		ast_format_cap_append_from_cap(session->direct_media_cap, cap, AST_MEDIA_TYPE_UNKNOWN);
-		changed = 1;
-	}
-
-	if (changed) {
-		ao2_ref(session, +1);
-
-		ast_debug(4, "RTP changed on %s; initiating direct media update\n", ast_channel_name(chan));
-		if (ast_sip_push_task(session->serializer, send_direct_media_request, session)) {
-			ao2_cleanup(session);
-		}
+	if (ast_sip_push_task(session->serializer, send_direct_media_request, cdata)) {
+		ast_log(LOG_ERROR, "Unable to send direct media request for channel %s\n", ast_channel_name(chan));
+		ao2_ref(cdata, -1);
 	}
 
 	return 0;
@@ -1100,6 +1163,7 @@ static int is_colp_update_allowed(struct ast_sip_session *session)
 static int update_connected_line_information(void *data)
 {
 	struct ast_sip_session *session = data;
+<<<<<<< HEAD
 
 	if (ast_channel_state(session->channel) == AST_STATE_UP
 		|| session->inv_session->role == PJSIP_ROLE_UAC) {
@@ -1119,6 +1183,27 @@ static int update_connected_line_information(void *data)
 			ast_sip_session_refresh(session, NULL, NULL, NULL, method, generate_new_sdp);
 		}
 	} else if (session->endpoint->id.rpid_immediate
+=======
+
+	if (ast_channel_state(session->channel) == AST_STATE_UP
+		|| session->inv_session->role == PJSIP_ROLE_UAC) {
+		if (is_colp_update_allowed(session)) {
+			enum ast_sip_session_refresh_method method;
+			int generate_new_sdp;
+
+			method = session->endpoint->id.refresh_method;
+			if (session->inv_session->invite_tsx
+				&& (session->inv_session->options & PJSIP_INV_SUPPORT_UPDATE)) {
+				method = AST_SIP_SESSION_REFRESH_METHOD_UPDATE;
+			}
+
+			/* Only the INVITE method actually needs SDP, UPDATE can do without */
+			generate_new_sdp = (method == AST_SIP_SESSION_REFRESH_METHOD_INVITE);
+
+			ast_sip_session_refresh(session, NULL, NULL, NULL, method, generate_new_sdp);
+		}
+	} else if (session->endpoint->rpid_immediate
+>>>>>>> upstream/certified/13.8
 		&& session->inv_session->state != PJSIP_INV_STATE_DISCONNECTED
 		&& is_colp_update_allowed(session)) {
 		int response_code = 0;
@@ -1137,6 +1222,7 @@ static int update_connected_line_information(void *data)
 			}
 		}
 	}
+<<<<<<< HEAD
 
 	ao2_ref(session, -1);
 	return 0;
@@ -1149,7 +1235,10 @@ static int local_hold_set_state(void *obj, void *arg, int flags)
 	unsigned int *held = arg;
 
 	session_media->locally_held = *held;
+=======
+>>>>>>> upstream/certified/13.8
 
+	ao2_ref(session, -1);
 	return 0;
 }
 
@@ -2461,8 +2550,16 @@ static int unload_module(void)
 }
 
 AST_MODULE_INFO(ASTERISK_GPL_KEY, AST_MODFLAG_LOAD_ORDER, "PJSIP Channel Driver",
+<<<<<<< HEAD
 	.support_level = AST_MODULE_SUPPORT_CORE,
 	.load = load_module,
 	.unload = unload_module,
 	.load_pri = AST_MODPRI_CHANNEL_DRIVER,
 );
+=======
+		.support_level = AST_MODULE_SUPPORT_CORE,
+		.load = load_module,
+		.unload = unload_module,
+		.load_pri = AST_MODPRI_CHANNEL_DRIVER,
+	       );
+>>>>>>> upstream/certified/13.8

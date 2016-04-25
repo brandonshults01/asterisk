@@ -172,6 +172,11 @@ struct ast_bridge_channel {
 		/*! Collected DTMF digits for DTMF hooks. */
 		char collected[MAXIMUM_DTMF_FEATURE_STRING];
 	} dtmf_hook_state;
+<<<<<<< HEAD
+=======
+	/*! Non-zero if a T.38 session terminate is owed to the bridge. */
+	char owed_t38_terminate;
+>>>>>>> upstream/certified/13.8
 };
 
 /*!

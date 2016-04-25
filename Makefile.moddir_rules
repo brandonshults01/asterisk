@@ -155,12 +155,20 @@ dist-clean::
 	rm -f *.exports
 
 .%.moduleinfo: %.c
+<<<<<<< HEAD
 	@echo "<member name=\"$*\" displayname=\"$(shell $(GREP) -e AST_MODULE_INFO $< | head -n 1 | cut -d '"' -f 2)\" remove_on_change=\"$(SUBDIR)/$*.o $(SUBDIR)/$*.i $(SUBDIR)/$*.so$(MODULEINFO_EXTRA_OUTPUT)\">" > $@
+=======
+	@echo "<member name=\"$*\" displayname=\"$(shell $(GREP) -e AST_MODULE_INFO $< | head -n 1 | cut -d '"' -f 2)\" remove_on_change=\"$(SUBDIR)/$*.o $(SUBDIR)/$*.so\">" > $@
+>>>>>>> upstream/certified/13.8
 	$(AWK) -f $(ASTTOPDIR)/build_tools/get_moduleinfo $^ >> $@
 	echo "</member>" >> $@
 
 .%.moduleinfo: %.cc
+<<<<<<< HEAD
 	@echo "<member name=\"$*\" displayname=\"$(shell $(GREP) -e AST_MODULE_INFO $< | head -n 1 | cut -d '"' -f 2)\" remove_on_change=\"$(SUBDIR)/$*.oo $(SUBDIR)/$*.ii $(SUBDIR)/$*.so$(MODULEINFO_EXTRA_OUTPUT)\">" > $@
+=======
+	@echo "<member name=\"$*\" displayname=\"$(shell $(GREP) -e AST_MODULE_INFO $< | head -n 1 | cut -d '"' -f 2)\" remove_on_change=\"$(SUBDIR)/$*.oo $(SUBDIR)/$*.so\">" > $@
+>>>>>>> upstream/certified/13.8
 	$(AWK) -f $(ASTTOPDIR)/build_tools/get_moduleinfo $^ >> $@
 	echo "</member>" >> $@
 

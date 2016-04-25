@@ -219,14 +219,22 @@ static struct mohclass *_mohclass_unref(struct mohclass *class, const char *tag,
 	struct mohclass *dup = ao2_callback(mohclasses, OBJ_POINTER, ao2_match_by_addr, class);
 
 	if (dup) {
+<<<<<<< HEAD
 		if (__ao2_ref(dup, -1, tag, file, line, funcname) == 2) {
+=======
+		if (__ao2_ref_debug(dup, -1, (char *) tag, (char *) file, line, funcname) == 2) {
+>>>>>>> upstream/certified/13.8
 			ast_log(LOG_WARNING, "Attempt to unref mohclass %p (%s) when only 1 ref remained, and class is still in a container! (at %s:%d (%s))\n",
 				class, class->name, file, line, funcname);
 		} else {
 			ao2_ref(class, -1);
 		}
 	} else {
+<<<<<<< HEAD
 		__ao2_ref(class, -1, tag, file, line, funcname);
+=======
+		__ao2_ref_debug(class, -1, (char *) tag, (char *) file, line, funcname);
+>>>>>>> upstream/certified/13.8
 	}
 	return NULL;
 }

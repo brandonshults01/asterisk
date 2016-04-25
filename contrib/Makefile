@@ -20,8 +20,15 @@ clean:
 include $(ASTTOPDIR)/Makefile.rules
 
 install:
+<<<<<<< HEAD
 	$(INSTALL) -d "$(DESTDIR)$(ASTDATADIR)/scripts"; \
 	$(INSTALL) -m 755 scripts/refcounter.py "$(DESTDIR)$(ASTDATADIR)/scripts/refcounter.py"; \
+=======
+	if [ -n "$(findstring REF_DEBUG,$(MENUSELECT_CFLAGS))" ]; then \
+		$(INSTALL) -d "$(DESTDIR)$(ASTDATADIR)/scripts"; \
+		$(INSTALL) -m 755 scripts/refcounter.py "$(DESTDIR)$(ASTDATADIR)/scripts/refcounter.py"; \
+	fi
+>>>>>>> upstream/certified/13.8
 
 uninstall:
 	rm -f "$(DESTDIR)$(ASTDATADIR)/scripts/refcounter.py"

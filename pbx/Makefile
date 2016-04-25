@@ -23,4 +23,17 @@ ifneq ($(findstring $(OSARCH), mingw32 cygwin ),)
   LIBS+= -lres_ael_share.so -lres_monitor.so
 endif
 
+<<<<<<< HEAD
 $(call MOD_ADD_C,pbx_dundi,dundi-parser.c)
+=======
+clean::
+	rm -f ael/*.o ael/*.i ael/*.gcda ael/*.gcno
+
+dundi-parser.o: dundi-parser.h
+dundi-parser.o: _ASTCFLAGS+=-I.
+
+pbx_gtkconsole.o: _ASTCFLAGS+=-Wno-strict-prototypes
+
+$(if $(filter pbx_dundi,$(EMBEDDED_MODS)),modules.link,pbx_dundi.so): dundi-parser.o
+dundi-parser.o: _ASTCFLAGS+=$(call MOD_ASTCFLAGS,pbx_dundi)
+>>>>>>> upstream/certified/13.8

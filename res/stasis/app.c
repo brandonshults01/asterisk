@@ -205,9 +205,16 @@ static void endpoint_state_cb(void *data, struct stasis_subscription *sub,
 static struct app_forwards *forwards_create_endpoint(struct stasis_app *app,
 	struct ast_endpoint *endpoint)
 {
+<<<<<<< HEAD
 	struct app_forwards *forwards;
 	int ret = 0;
 
+=======
+
+	struct app_forwards *forwards;
+	int ret = 0;
+
+>>>>>>> upstream/certified/13.8
 	if (!app) {
 		return NULL;
 	}

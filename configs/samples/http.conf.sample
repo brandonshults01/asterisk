@@ -21,7 +21,11 @@
 ; of the Server header field from HTTP response message headers and the
 ; <address /> element from HTTP response message bodies.
 ;
+<<<<<<< HEAD
 servername=Asterisk
+=======
+;servername=Asterisk
+>>>>>>> upstream/certified/13.8
 ;
 ; Whether HTTP/HTTPS interface is enabled or not.  Default is no.
 ; This also affects manager/rawman/mxml access (see manager.conf)

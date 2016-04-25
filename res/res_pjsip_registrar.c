@@ -244,7 +244,11 @@ static struct serializer *serializer_create(const char *aor_name)
 	ast_taskprocessor_build_name(tps_name, sizeof(tps_name), "pjsip/aor/%s",
 		aor_name);
 
+<<<<<<< HEAD
 	if (!(ser->serializer = ast_sip_create_serializer(tps_name))) {
+=======
+	if (!(ser->serializer = ast_sip_create_serializer_named(tps_name))) {
+>>>>>>> upstream/certified/13.8
 		ao2_ref(ser, -1);
 		return NULL;
 	}
@@ -651,8 +655,12 @@ static pj_bool_t registrar_on_rx_request(struct pjsip_rx_data *rdata)
 	configured_aors = ast_strdupa(endpoint->aors);
 
 	/* Iterate the configured AORs to see if the user or the user+domain match */
-	while ((aor_name = strsep(&configured_aors, ","))) {
+	while ((aor_name = ast_strip(strsep(&configured_aors, ",")))) {
 		struct ast_sip_domain_alias *alias = NULL;
+
+		if (ast_strlen_zero(aor_name)) {
+			continue;
+		}
 
 		if (!pj_strcmp2(&uri->user, aor_name)) {
 			break;
@@ -773,8 +781,13 @@ static int ami_show_registrations(struct mansession *s, const struct message *m)
 	int count = 0;
 	struct ast_sip_ami ami = { .s = s, .m = m, .arg = &count, .action_id = astman_get_header(m, "ActionID"), };
 
+<<<<<<< HEAD
 	astman_send_listack(s, m, "Following are Events for each Inbound registration",
 		"start");
+=======
+	astman_send_listack(s, m, "Following are Events for each Inbound "
+			    "registration", "start");
+>>>>>>> upstream/certified/13.8
 
 	ami_registrations_endpoints(&ami);
 

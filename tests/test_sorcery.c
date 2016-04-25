@@ -220,12 +220,15 @@ static int sorcery_test_delete(const struct ast_sorcery *sorcery, void *data, vo
 	return 0;
 }
 
+<<<<<<< HEAD
 static int sorcery_test_is_stale(const struct ast_sorcery *sorcery, void *data, void *object)
 {
 	cache.is_stale = 1;
 	return 1;
 }
 
+=======
+>>>>>>> upstream/certified/13.8
 /*! \brief Dummy sorcery wizards, not actually used so we only populate the name and nothing else */
 static struct ast_sorcery_wizard test_wizard = {
 	.name = "test",
@@ -243,7 +246,10 @@ static struct ast_sorcery_wizard test_wizard2 = {
 	.retrieve_id = sorcery_test_retrieve_id,
 	.update = sorcery_test_update,
 	.delete = sorcery_test_delete,
+<<<<<<< HEAD
 	.is_stale = sorcery_test_is_stale,
+=======
+>>>>>>> upstream/certified/13.8
 };
 
 static void sorcery_observer_created(const void *object)

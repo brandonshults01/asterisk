@@ -671,12 +671,20 @@ static int bridge_channel_write_frame(struct ast_bridge_channel *bridge_channel,
 			switch (t38_parameters->request_response) {
 			case AST_T38_REQUEST_NEGOTIATE:
 			case AST_T38_NEGOTIATED:
+<<<<<<< HEAD
 				bridge_channel->owed.t38_terminate = 1;
+=======
+				bridge_channel->owed_t38_terminate = 1;
+>>>>>>> upstream/certified/13.8
 				break;
 			case AST_T38_REQUEST_TERMINATE:
 			case AST_T38_TERMINATED:
 			case AST_T38_REFUSED:
+<<<<<<< HEAD
 				bridge_channel->owed.t38_terminate = 0;
+=======
+				bridge_channel->owed_t38_terminate = 0;
+>>>>>>> upstream/certified/13.8
 				break;
 			default:
 				break;
@@ -712,7 +720,11 @@ static int bridge_channel_write_frame(struct ast_bridge_channel *bridge_channel,
 static void bridge_channel_cancel_owed_events(struct ast_bridge_channel *bridge_channel)
 {
 	bridge_channel->owed.dtmf_digit = '\0';
+<<<<<<< HEAD
 	bridge_channel->owed.t38_terminate = 0;
+=======
+	bridge_channel->owed_t38_terminate = 0;
+>>>>>>> upstream/certified/13.8
 }
 
 void bridge_channel_settle_owed_events(struct ast_bridge *orig_bridge, struct ast_bridge_channel *bridge_channel)
@@ -734,7 +746,11 @@ void bridge_channel_settle_owed_events(struct ast_bridge *orig_bridge, struct as
 		bridge_channel->owed.dtmf_digit = '\0';
 		orig_bridge->technology->write(orig_bridge, NULL, &frame);
 	}
+<<<<<<< HEAD
 	if (bridge_channel->owed.t38_terminate) {
+=======
+	if (bridge_channel->owed_t38_terminate) {
+>>>>>>> upstream/certified/13.8
 		struct ast_control_t38_parameters t38_parameters = {
 			.request_response = AST_T38_TERMINATED,
 		};
@@ -748,7 +764,11 @@ void bridge_channel_settle_owed_events(struct ast_bridge *orig_bridge, struct as
 
 		ast_debug(1, "T.38 terminate simulated to bridge %s because %s left.\n",
 			orig_bridge->uniqueid, ast_channel_name(bridge_channel->chan));
+<<<<<<< HEAD
 		bridge_channel->owed.t38_terminate = 0;
+=======
+		bridge_channel->owed_t38_terminate = 0;
+>>>>>>> upstream/certified/13.8
 		orig_bridge->technology->write(orig_bridge, NULL, &frame);
 	}
 }

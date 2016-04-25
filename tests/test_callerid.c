@@ -34,7 +34,11 @@
 #include "asterisk.h"
 #include "asterisk/callerid.h"
 
+<<<<<<< HEAD
 ASTERISK_REGISTER_FILE()
+=======
+ASTERISK_FILE_VERSION(__FILE__, "$Revision$")
+>>>>>>> upstream/certified/13.8
 
 #include "asterisk/utils.h"
 #include "asterisk/module.h"

@@ -40,6 +40,7 @@
  */
 
 /*** MODULEINFO
+	<defaultenabled>no</defaultenabled>
 	<support_level>extended</support_level>
  ***/
 
@@ -464,7 +465,11 @@ static inline int __ast_pthread_mutex_unlock(const char *filename, int lineno, c
 	}
 
 	if ((res = pthread_mutex_unlock(&t->mutex))) {
+<<<<<<< HEAD
 		__ast_mutex_logger("%s line %d (%s): Error releasing mutex: %s\n",
+=======
+		__ast_mutex_logger("%s line %d (%s): Error releasing mutex: %s\n", 
+>>>>>>> upstream/certified/13.8
 				   filename, lineno, func, strerror(res));
 		DO_THREAD_CRASH;
 	}
@@ -1695,7 +1700,11 @@ extern int ast_language_is_prefix;
 */
 #define AST_RWLIST_RDLOCK(head)                                         \
         ast_rwlock_rdlock(&(head)->lock)
+<<<<<<< HEAD
 
+=======
+	
+>>>>>>> upstream/certified/13.8
 /*!
   \brief Attempts to unlock a read/write based list.
   \param head This is a pointer to the list head structure

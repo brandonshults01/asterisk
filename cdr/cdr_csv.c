@@ -33,6 +33,7 @@
  */
 
 /*** MODULEINFO
+	<defaultenabled>no</defaultenabled>
 	<support_level>extended</support_level>
  ***/
 
@@ -251,7 +252,11 @@ static int build_csv_record(char *buf, size_t bufsize, struct ast_cdr *cdr)
 		append_string(buf, cdr->uniqueid, bufsize);
 	/* append the user field */
 	if(loguserfield)
+<<<<<<< HEAD
 		append_string(buf, cdr->userfield, bufsize);
+=======
+		append_string(buf, cdr->userfield,bufsize);
+>>>>>>> upstream/certified/13.8
 	if (newcdrcolumns) {
 		append_string(buf, cdr->peeraccount, bufsize);
 		append_string(buf, cdr->linkedid, bufsize);

@@ -1712,12 +1712,21 @@ int ast_bridge_impart(struct ast_bridge *bridge,
 		} else {
 			res = ast_pthread_create(&bridge_channel->thread, NULL,
 				bridge_channel_depart_thread, &cond);
+<<<<<<< HEAD
 		}
 
 		if (!res) {
 			bridge_channel_internal_wait(&cond);
 		}
 
+=======
+		}
+
+		if (!res) {
+			bridge_channel_internal_wait(&cond);
+		}
+
+>>>>>>> upstream/certified/13.8
 		ast_cond_destroy(&cond.cond);
 		ast_mutex_destroy(&cond.lock);
 	}

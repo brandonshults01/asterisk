@@ -75,6 +75,7 @@ ASTERISK_REGISTER_FILE()
 
 /*! \brief Structure definition for session */
 struct ast_websocket {
+<<<<<<< HEAD
 	FILE *f;                           /*!< Pointer to the file instance used for writing and reading */
 	int fd;                            /*!< File descriptor for the session, only used for polling */
 	struct ast_sockaddr address;       /*!< Address of the remote client */
@@ -88,6 +89,20 @@ struct ast_websocket {
 	unsigned int close_sent:1;         /*!< Bit to indicate that the session close opcode has been sent and no further data will be sent */
 	struct websocket_client *client;   /*!< Client object when connected as a client websocket */
 	char session_id[AST_UUID_STR_LEN]; /*!< The identifier for the websocket session */
+=======
+	FILE *f;                          /*!< Pointer to the file instance used for writing and reading */
+	int fd;                           /*!< File descriptor for the session, only used for polling */
+	struct ast_sockaddr address;      /*!< Address of the remote client */
+	enum ast_websocket_opcode opcode; /*!< Cached opcode for multi-frame messages */
+	size_t payload_len;               /*!< Length of the payload */
+	char *payload;                    /*!< Pointer to the payload */
+	size_t reconstruct;               /*!< Number of bytes before a reconstructed payload will be returned and a new one started */
+	int timeout;                      /*!< The timeout for operations on the socket */
+	unsigned int secure:1;            /*!< Bit to indicate that the transport is secure */
+	unsigned int closing:1;           /*!< Bit to indicate that the session is in the process of being closed */
+	unsigned int close_sent:1;        /*!< Bit to indicate that the session close opcode has been sent and no further data will be sent */
+	struct websocket_client *client;  /*!< Client object when connected as a client websocket */
+>>>>>>> upstream/certified/13.8
 };
 
 /*! \brief Hashing function for protocols */
@@ -338,10 +353,17 @@ int AST_OPTIONAL_API_NAME(ast_websocket_write)(struct ast_websocket *session, en
 	char *frame;
 	uint64_t length;
 	uint64_t frame_size;
+<<<<<<< HEAD
 
 	ast_debug(3, "Writing websocket %s frame, length %" PRIu64 "\n",
 			websocket_opcode2str(opcode), payload_size);
 
+=======
+
+	ast_debug(3, "Writing websocket %s frame, length %" PRIu64 "\n",
+			websocket_opcode2str(opcode), payload_size);
+
+>>>>>>> upstream/certified/13.8
 	if (payload_size < 126) {
 		length = payload_size;
 	} else if (payload_size < (1 << 16)) {
@@ -828,6 +850,7 @@ int AST_OPTIONAL_API_NAME(ast_websocket_uri_cb)(struct ast_tcptls_session_instan
 		}
 		session->timeout =  AST_DEFAULT_WEBSOCKET_WRITE_TIMEOUT;
 
+<<<<<<< HEAD
 		/* Generate the session id */
 		if (!ast_uuid_generate_str(session->session_id, sizeof(session->session_id))) {
 			ast_log(LOG_WARNING, "WebSocket connection from '%s' could not be accepted - failed to generate a session id\n",
@@ -839,6 +862,10 @@ int AST_OPTIONAL_API_NAME(ast_websocket_uri_cb)(struct ast_tcptls_session_instan
 
 		if (protocol_handler->session_attempted
 		    && protocol_handler->session_attempted(ser, get_vars, headers, session->session_id)) {
+=======
+		if (protocol_handler->session_attempted
+		    && protocol_handler->session_attempted(ser, get_vars, headers)) {
+>>>>>>> upstream/certified/13.8
 			ast_debug(3, "WebSocket connection from '%s' rejected by protocol handler '%s'\n",
 				ast_sockaddr_stringify(&ser->remote_address), protocol_handler->name);
 			websocket_bad_request(ser);

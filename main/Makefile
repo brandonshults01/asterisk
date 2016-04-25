@@ -44,7 +44,10 @@ AST_LIBS+=$(URIPARSER_LIB)
 AST_LIBS+=$(UUID_LIB)
 AST_LIBS+=$(CRYPT_LIB)
 AST_LIBS+=$(AST_CLANG_BLOCKS_LIBS)
+<<<<<<< HEAD
 AST_LIBS+=$(RT_LIB)
+=======
+>>>>>>> upstream/certified/13.8
 
 ifneq ($(findstring $(OSARCH), linux-gnu uclinux linux-uclibc kfreebsd-gnu),)
   ifneq ($(findstring LOADABLE_MODULES,$(MENUSELECT_CFLAGS)),)
@@ -205,7 +208,11 @@ ifeq ($(findstring darwin,$(OSARCH)),) # not Darwin
 ASTSSL_LIB:=libasteriskssl.so
 
 $(ASTSSL_LIB).$(ASTSSL_SO_VERSION): _ASTLDFLAGS+=-Wl,-soname=$(ASTSSL_LIB)
+<<<<<<< HEAD
 $(ASTSSL_LIB).$(ASTSSL_SO_VERSION): _ASTCFLAGS+=-fPIC -DAST_MODULE=\"asteriskssl\" -DAST_NOT_MODULE
+=======
+$(ASTSSL_LIB).$(ASTSSL_SO_VERSION): _ASTCFLAGS+=-fPIC -DAST_MODULE=\"asteriskssl\"
+>>>>>>> upstream/certified/13.8
 $(ASTSSL_LIB).$(ASTSSL_SO_VERSION): LIBS+=$(ASTSSL_LIBS)
 ifeq ($(GNU_LD),1)
     $(ASTSSL_LIB).$(ASTSSL_SO_VERSION): SO_SUPPRESS_SYMBOLS=-Wl,--version-script,libasteriskssl.exports,--warn-common

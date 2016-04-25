@@ -13,7 +13,10 @@ down_revision = '136885b81223'
 from alembic import op
 import sqlalchemy as sa
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> upstream/certified/13.8
 def upgrade():
     with op.batch_alter_table('ps_aors') as batch_op:
         batch_op.alter_column('qualify_timeout', type_=sa.Float)

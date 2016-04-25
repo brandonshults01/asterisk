@@ -77,14 +77,21 @@ struct ast_websocket;
  * \param ser The TCP/TLS session
  * \param parameters Parameters extracted from the request URI
  * \param headers Headers included in the request
+<<<<<<< HEAD
  * \param session_id The id of the current session.
+=======
+>>>>>>> upstream/certified/13.8
  *
  * \retval 0 The session should be accepted
  * \retval -1 The session should be rejected. Note that the caller must send an error
  * response using \ref ast_http_error.
  * \since 13.5.0
  */
+<<<<<<< HEAD
 typedef int (*ast_websocket_pre_callback)(struct ast_tcptls_session_instance *ser, struct ast_variable *parameters, struct ast_variable *headers, const char *session_id);
+=======
+typedef int (*ast_websocket_pre_callback)(struct ast_tcptls_session_instance *ser, struct ast_variable *parameters, struct ast_variable *headers);
+>>>>>>> upstream/certified/13.8
 
 /*!
  * \brief Callback for when a new connection for a sub-protocol is established

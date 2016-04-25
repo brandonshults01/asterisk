@@ -607,7 +607,11 @@ static void set_rec_filename(struct confbridge_conference *conference, struct as
 	if (ast_strlen_zero(rec_file)) {
 		ast_str_set(filename, 0, "confbridge-%s-%u.wav", conference->name,
 			(unsigned int) now);
+<<<<<<< HEAD
 	} else if (ast_test_flag(&conference->b_profile, BRIDGE_OPT_RECORD_FILE_TIMESTAMP)) {
+=======
+	} else {
+>>>>>>> upstream/certified/13.8
 		/* insert time before file extension */
 		ext = strrchr(rec_file, '.');
 		if (ext) {
@@ -619,10 +623,16 @@ static void set_rec_filename(struct confbridge_conference *conference, struct as
 	} else {
 		ast_str_set(filename, 0, "%s", rec_file);
 	}
+<<<<<<< HEAD
 	ast_str_append(filename, 0, ",%s%s,%s",
 		ast_test_flag(&conference->b_profile, BRIDGE_OPT_RECORD_FILE_APPEND) ? "a" : "",
 		conference->b_profile.rec_options,
 		conference->b_profile.rec_command);
+=======
+	if (ast_test_flag(&conference->b_profile, BRIDGE_OPT_RECORD_FILE_APPEND)) {
+		ast_str_append(filename, 0, ",a");
+	}
+>>>>>>> upstream/certified/13.8
 }
 
 static int is_new_rec_file(const char *rec_file, struct ast_str **orig_rec_file)
@@ -706,6 +716,16 @@ static int conf_start_record(struct confbridge_conference *conference)
 	struct ast_channel *chan;
 	struct ast_format_cap *cap;
 	struct ast_bridge_features *features;
+<<<<<<< HEAD
+
+	if (conf_is_recording(conference)) {
+		return -1;
+	}
+
+	mixmonapp = pbx_findapp("MixMonitor");
+	if (!mixmonapp) {
+		ast_log(LOG_WARNING, "Cannot record ConfBridge, MixMonitor app is not installed\n");
+=======
 
 	if (conf_is_recording(conference)) {
 		return -1;
@@ -716,6 +736,13 @@ static int conf_start_record(struct confbridge_conference *conference)
 		ast_log(LOG_WARNING, "Cannot record ConfBridge, MixMonitor app is not installed\n");
 		return -1;
 	}
+
+	features = ast_bridge_features_new();
+	if (!features) {
+>>>>>>> upstream/certified/13.8
+		return -1;
+	}
+	ast_set_flag(&features->feature_flags, AST_BRIDGE_CHANNEL_FLAG_IMMOVABLE);
 
 	features = ast_bridge_features_new();
 	if (!features) {
@@ -1086,7 +1113,35 @@ void conf_update_user_mute(struct confbridge_user *user)
 		"Channel: %s",
 		mute_effective ? "muted" : "unmuted",
 		user->conference->b_profile.name,
+<<<<<<< HEAD
 		ast_channel_name(user->chan));
+}
+
+/*
+ * \internal
+ * \brief Mute/unmute a single user.
+ */
+static void generic_mute_unmute_user(struct confbridge_conference *conference, struct confbridge_user *user, int mute)
+{
+	/* Set user level mute request. */
+	user->muted = mute ? 1 : 0;
+
+	conf_update_user_mute(user);
+	ast_test_suite_event_notify("CONF_MUTE",
+		"Message: participant %s %s\r\n"
+		"Conference: %s\r\n"
+		"Channel: %s",
+		ast_channel_name(user->chan),
+		mute ? "muted" : "unmuted",
+		conference->b_profile.name,
+=======
+>>>>>>> upstream/certified/13.8
+		ast_channel_name(user->chan));
+	if (mute) {
+		send_mute_event(user, conference);
+	} else {
+		send_unmute_event(user, conference);
+	}
 }
 
 /*
@@ -3465,7 +3520,11 @@ static int load_module(void)
 	res |= ast_manager_register_xml("ConfbridgeUnlock", EVENT_FLAG_CALL, action_confbridgeunlock);
 	res |= ast_manager_register_xml("ConfbridgeLock", EVENT_FLAG_CALL, action_confbridgelock);
 	res |= ast_manager_register_xml("ConfbridgeStartRecord", EVENT_FLAG_SYSTEM, action_confbridgestartrecord);
+<<<<<<< HEAD
 	res |= ast_manager_register_xml("ConfbridgeStopRecord", EVENT_FLAG_SYSTEM, action_confbridgestoprecord);
+=======
+	res |= ast_manager_register_xml("ConfbridgeStopRecord", EVENT_FLAG_CALL, action_confbridgestoprecord);
+>>>>>>> upstream/certified/13.8
 	res |= ast_manager_register_xml("ConfbridgeSetSingleVideoSrc", EVENT_FLAG_CALL, action_confbridgesetsinglevideosrc);
 	if (res) {
 		unload_module();

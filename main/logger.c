@@ -86,7 +86,15 @@ static int logger_initialized;
 static volatile int next_unique_callid = 1; /* Used to assign unique call_ids to calls */
 static int display_callids;
 
+<<<<<<< HEAD
 AST_THREADSTORAGE(unique_callid);
+=======
+struct ast_callid {
+	int call_identifier; /* Numerical value of the call displayed in the logs */
+};
+
+AST_THREADSTORAGE_CUSTOM(unique_callid, NULL, unique_callid_cleanup);
+>>>>>>> upstream/certified/13.8
 
 static enum rotatestrategy {
 	NONE = 0,                /* Do not rotate log files at all, instead rely on external mechanisms */
@@ -104,6 +112,7 @@ static struct {
 
 static char hostname[MAXHOSTNAMELEN];
 AST_THREADSTORAGE_RAW(in_safe_log);
+<<<<<<< HEAD
 
 struct logchannel;
 struct logmsg;
@@ -114,6 +123,8 @@ struct logformatter {
 	/* Pointer to the function that will format the log */
 	int (* const format_log)(struct logchannel *channel, struct logmsg *msg, char *buf, size_t size);
 };
+=======
+>>>>>>> upstream/certified/13.8
 
 enum logtypes {
 	LOGTYPE_SYSLOG,
@@ -247,6 +258,7 @@ AST_THREADSTORAGE(verbose_build_buf);
 AST_THREADSTORAGE(log_buf);
 #define LOG_BUF_INIT_SIZE       256
 
+<<<<<<< HEAD
 static int format_log_json(struct logchannel *channel, struct logmsg *msg, char *buf, size_t size)
 {
 	struct ast_json *json;
@@ -358,6 +370,8 @@ static struct logformatter logformatter_default = {
 	.format_log = format_log_default,
 };
 
+=======
+>>>>>>> upstream/certified/13.8
 static void make_components(struct logchannel *chan)
 {
 	char *w;
@@ -560,6 +574,7 @@ static struct logchannel *make_logchannel(const char *channel, const char *compo
 }
 
 /* \brief Read config, setup channels.
+<<<<<<< HEAD
  * \param altconf Alternate configuration file to read.
  *
  * \pre logchannels list is write locked
@@ -568,6 +583,15 @@ static struct logchannel *make_logchannel(const char *channel, const char *compo
  * \retval -1 No config found or Failed
  */
 static int init_logger_chain(const char *altconf)
+=======
+ * \param locked The logchannels list is locked and this is a reload
+ * \param altconf Alternate configuration file to read.
+ *
+ * \retval 0 Success
+ * \retval -1 No config found or Failed
+ */
+static int init_logger_chain(int locked, const char *altconf)
+>>>>>>> upstream/certified/13.8
 {
 	struct logchannel *chan;
 	struct ast_config *cfg;
@@ -579,6 +603,13 @@ static int init_logger_chain(const char *altconf)
 		cfg = NULL;
 	}
 
+<<<<<<< HEAD
+=======
+	if (!locked) {
+		AST_RWLIST_WRLOCK(&logchannels);
+	}
+
+>>>>>>> upstream/certified/13.8
 	/* Set defaults */
 	hostname[0] = '\0';
 	display_callids = 1;
@@ -607,10 +638,22 @@ static int init_logger_chain(const char *altconf)
 		}
 		chan->type = LOGTYPE_CONSOLE;
 		chan->logmask = __LOG_WARNING | __LOG_NOTICE | __LOG_ERROR;
+<<<<<<< HEAD
 		memcpy(&chan->formatter, &logformatter_default, sizeof(chan->formatter));
 
 		AST_RWLIST_INSERT_HEAD(&logchannels, chan, list);
 		global_logmask |= chan->logmask;
+=======
+
+		if (!locked) {
+			AST_RWLIST_WRLOCK(&logchannels);
+		}
+		AST_RWLIST_INSERT_HEAD(&logchannels, chan, list);
+		global_logmask |= chan->logmask;
+		if (!locked) {
+			AST_RWLIST_UNLOCK(&logchannels);
+		}
+>>>>>>> upstream/certified/13.8
 
 		return -1;
 	}
@@ -1134,7 +1177,11 @@ int ast_logger_rotate_channel(const char *log_channel)
 		}
 	}
 
+<<<<<<< HEAD
 	init_logger_chain(NULL);
+=======
+	init_logger_chain(1 /* locked */, NULL);
+>>>>>>> upstream/certified/13.8
 
 	AST_RWLIST_UNLOCK(&logchannels);
 
@@ -1432,6 +1479,36 @@ static struct sigaction handle_SIGXFSZ = {
 	.sa_flags = SA_RESTART,
 };
 
+<<<<<<< HEAD
+=======
+static void ast_log_vsyslog(struct logmsg *msg, int facility)
+{
+	char buf[BUFSIZ];
+	int syslog_level = ast_syslog_priority_from_loglevel(msg->level);
+	char call_identifier_str[13];
+
+	if (msg->callid) {
+		snprintf(call_identifier_str, sizeof(call_identifier_str), "[C-%08x]", (unsigned)msg->callid->call_identifier);
+	} else {
+		call_identifier_str[0] = '\0';
+	}
+
+	if (syslog_level < 0) {
+		/* we are locked here, so cannot ast_log() */
+		fprintf(stderr, "ast_log_vsyslog called with bogus level: %d\n", msg->level);
+		return;
+	}
+
+	syslog_level = LOG_MAKEPRI(facility, syslog_level);
+
+	snprintf(buf, sizeof(buf), "%s[%d]%s: %s:%d in %s: %s",
+		 levels[msg->level], msg->lwp, call_identifier_str, msg->file, msg->line, msg->function, msg->message);
+
+	term_strip(buf, buf, strlen(buf) + 1);
+	syslog(syslog_level, "%s", buf);
+}
+
+>>>>>>> upstream/certified/13.8
 static char *logger_strip_verbose_magic(const char *message, int level)
 {
 	const char *begin, *end;
@@ -1499,9 +1576,18 @@ static void logger_print_normal(struct logmsg *logmsg)
 				continue;
 			}
 
+<<<<<<< HEAD
 			if (!(chan->logmask & (1 << logmsg->level))) {
 				continue;
 			}
+=======
+			/* Check syslog channels */
+			if (chan->type == LOGTYPE_SYSLOG && (chan->logmask & (1 << logmsg->level))) {
+				ast_log_vsyslog(logmsg, chan->facility);
+			/* Console channels */
+			} else if (chan->type == LOGTYPE_CONSOLE && (chan->logmask & (1 << logmsg->level))) {
+				char linestr[128];
+>>>>>>> upstream/certified/13.8
 
 			switch (chan->type) {
 			case LOGTYPE_SYSLOG:
@@ -1706,9 +1792,13 @@ int init_logger(void)
 	ast_mkdir(ast_config_AST_LOG_DIR, 0777);
 
 	/* create log channels */
+<<<<<<< HEAD
 	AST_RWLIST_WRLOCK(&logchannels);
 	res = init_logger_chain(NULL);
 	AST_RWLIST_UNLOCK(&logchannels);
+=======
+	res = init_logger_chain(0 /* locked */, NULL);
+>>>>>>> upstream/certified/13.8
 	ast_verb_update();
 	logger_initialized = 1;
 	if (res) {
@@ -2019,7 +2109,41 @@ void ast_log_safe(int level, const char *file, int line, const char *function, c
 	ast_threadstorage_set_ptr(&in_safe_log, NULL);
 }
 
+<<<<<<< HEAD
 void ast_log_callid(int level, const char *file, int line, const char *function, ast_callid callid, const char *fmt, ...)
+=======
+void ast_log_safe(int level, const char *file, int line, const char *function, const char *fmt, ...)
+{
+	va_list ap;
+	void *recursed = ast_threadstorage_get_ptr(&in_safe_log);
+	struct ast_callid *callid;
+
+	if (recursed) {
+		return;
+	}
+
+	if (ast_threadstorage_set_ptr(&in_safe_log, (void*)1)) {
+		/* We've failed to set the flag that protects against
+		 * recursion, so bail. */
+		return;
+	}
+
+	callid = ast_read_threadstorage_callid();
+
+	va_start(ap, fmt);
+	ast_log_full(level, file, line, function, callid, fmt, ap);
+	va_end(ap);
+
+	if (callid) {
+		ast_callid_unref(callid);
+	}
+
+	/* Clear flag so the next allocation failure can be logged. */
+	ast_threadstorage_set_ptr(&in_safe_log, NULL);
+}
+
+void ast_log_callid(int level, const char *file, int line, const char *function, struct ast_callid *callid, const char *fmt, ...)
+>>>>>>> upstream/certified/13.8
 {
 	va_list ap;
 	va_start(ap, fmt);

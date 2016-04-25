@@ -39,6 +39,7 @@
  */
 
 /*** MODULEINFO
+	<defaultenabled>no</defaultenabled>
 	<support_level>extended</support_level>
  ***/
 
@@ -393,7 +394,11 @@ static void provider_destructor(void *obj)
 static void delete_file(struct phoneprov_file *file)
 {
 	ast_string_field_free_memory(file);
+<<<<<<< HEAD
 	ast_free(file);
+=======
+	free(file);
+>>>>>>> upstream/certified/13.8
 }
 
 /*! \brief Read a TEXT file into a string and return the length */
@@ -1192,6 +1197,7 @@ static struct ast_http_uri phoneprovuri = {
 };
 
 static struct varshead *get_defaults(void)
+<<<<<<< HEAD
 {
 	struct ast_config *phoneprov_cfg, *cfg = CONFIG_STATUS_FILEINVALID;
 	const char *value;
@@ -1446,11 +1452,57 @@ static int load_module(void)
 	}
 
 	ast_http_uri_link(&phoneprovuri);
+=======
+{
+	struct ast_config *phoneprov_cfg, *cfg = CONFIG_STATUS_FILEINVALID;
+	const char *value;
+	struct ast_variable *v;
+	struct ast_var_t *var;
+	struct ast_flags config_flags = { 0 };
+	struct varshead *defaults = ast_var_list_create();
 
-	ast_custom_function_register(&pp_each_user_function);
-	ast_custom_function_register(&pp_each_extension_function);
-	ast_cli_register_multiple(pp_cli, ARRAY_LEN(pp_cli));
+	if (!defaults) {
+		ast_log(LOG_ERROR, "Unable to create default var list.\n");
+		return NULL;
+	}
 
+	if (!(phoneprov_cfg = ast_config_load("phoneprov.conf", config_flags))
+		|| phoneprov_cfg == CONFIG_STATUS_FILEINVALID) {
+		ast_log(LOG_ERROR, "Unable to load config phoneprov.conf\n");
+		ast_var_list_destroy(defaults);
+		return NULL;
+	}
+
+	value = ast_variable_retrieve(phoneprov_cfg, "general", pp_general_lookup[AST_PHONEPROV_STD_SERVER]);
+	if (!value) {
+		struct in_addr addr;
+		value = ast_variable_retrieve(phoneprov_cfg, "general", pp_general_lookup[AST_PHONEPROV_STD_SERVER_IFACE]);
+		if (value) {
+			lookup_iface(value, &addr);
+			value = ast_inet_ntoa(addr);
+		}
+	}
+	if (value) {
+		var = ast_var_assign(variable_lookup[AST_PHONEPROV_STD_SERVER], value);
+		AST_VAR_LIST_INSERT_TAIL(defaults, var);
+	} else {
+		ast_log(LOG_WARNING, "Unable to find a valid server address or name.\n");
+	}
+>>>>>>> upstream/certified/13.8
+
+	value = ast_variable_retrieve(phoneprov_cfg, "general", pp_general_lookup[AST_PHONEPROV_STD_SERVER_PORT]);
+	if (!value) {
+		if ((cfg = ast_config_load("sip.conf", config_flags)) && cfg != CONFIG_STATUS_FILEINVALID) {
+			value = ast_variable_retrieve(cfg, "general", "bindport");
+		}
+	}
+	var = ast_var_assign(variable_lookup[AST_PHONEPROV_STD_SERVER_PORT], S_OR(value, "5060"));
+	if(cfg && cfg != CONFIG_STATUS_FILEINVALID) {
+		ast_config_destroy(cfg);
+	}
+	AST_VAR_LIST_INSERT_TAIL(defaults, var);
+
+<<<<<<< HEAD
 	return AST_MODULE_LOAD_SUCCESS;
 
 error:
@@ -1488,6 +1540,224 @@ static int reload(void)
 	ao2_unlock(providers);
 
 	return AST_MODULE_LOAD_SUCCESS;
+=======
+	value = ast_variable_retrieve(phoneprov_cfg, "general", pp_general_lookup[AST_PHONEPROV_STD_PROFILE]);
+	if (!value) {
+		ast_log(LOG_ERROR, "Unable to load default profile.\n");
+		ast_config_destroy(phoneprov_cfg);
+		ast_var_list_destroy(defaults);
+		return NULL;
+	}
+	var = ast_var_assign(variable_lookup[AST_PHONEPROV_STD_PROFILE], value);
+	AST_VAR_LIST_INSERT_TAIL(defaults, var);
+	ast_config_destroy(phoneprov_cfg);
+
+	if (!(cfg = ast_config_load("users.conf", config_flags)) || cfg == CONFIG_STATUS_FILEINVALID) {
+		ast_log(LOG_ERROR, "Unable to load users.conf\n");
+		ast_var_list_destroy(defaults);
+		return NULL;
+	}
+
+	/* Go ahead and load global variables from users.conf so we can append to profiles */
+	for (v = ast_variable_browse(cfg, "general"); v; v = v->next) {
+		if (!strcasecmp(v->name, pp_user_lookup[AST_PHONEPROV_STD_VOICEMAIL_EXTEN])) {
+			var = ast_var_assign(variable_lookup[AST_PHONEPROV_STD_VOICEMAIL_EXTEN], v->value);
+			AST_VAR_LIST_INSERT_TAIL(defaults, var);
+		}
+		if (!strcasecmp(v->name, pp_user_lookup[AST_PHONEPROV_STD_EXTENSION_LENGTH])) {
+			var = ast_var_assign(variable_lookup[AST_PHONEPROV_STD_EXTENSION_LENGTH], v->value);
+			AST_VAR_LIST_INSERT_TAIL(defaults, var);
+		}
+	}
+	ast_config_destroy(cfg);
+
+	return defaults;
+}
+
+static int load_users(void)
+{
+	struct ast_config *cfg;
+	char *cat;
+	const char *value;
+	struct ast_flags config_flags = { 0 };
+	struct varshead *defaults = get_defaults();
+
+	if (!defaults) {
+		ast_log(LOG_WARNING, "Unable to load default variables.\n");
+		return -1;
+	}
+
+	if (!(cfg = ast_config_load("users.conf", config_flags))
+		|| cfg == CONFIG_STATUS_FILEINVALID) {
+		ast_log(LOG_WARNING, "Unable to load users.conf\n");
+		ast_var_list_destroy(defaults);
+		return -1;
+	}
+
+	cat = NULL;
+	while ((cat = ast_category_browse(cfg, cat))) {
+		const char *tmp;
+		int i;
+		struct ast_var_t *varx;
+		struct ast_var_t *vard;
+
+		if (strcasecmp(cat, "general") && strcasecmp(cat, "authentication")) {
+			struct varshead *variables = ast_var_list_create();
+
+			if (!((tmp = ast_variable_retrieve(cfg, cat, "autoprov")) && ast_true(tmp))) {
+				ast_var_list_destroy(variables);
+				continue;
+			}
+
+			/* Transfer the standard variables */
+			for (i = 0; i < AST_PHONEPROV_STD_VAR_LIST_LENGTH; i++) {
+				if (pp_user_lookup[i]) {
+					value = ast_variable_retrieve(cfg, cat, pp_user_lookup[i]);
+					if (value) {
+						varx = ast_var_assign(variable_lookup[i],
+							value);
+						AST_VAR_LIST_INSERT_TAIL(variables, varx);
+					}
+				}
+			}
+
+			if (!ast_var_find(variables, variable_lookup[AST_PHONEPROV_STD_MAC])) {
+				ast_log(LOG_WARNING, "autoprov set for %s, but no mac address - skipping.\n", cat);
+				ast_var_list_destroy(variables);
+				continue;
+			}
+
+			/* Apply defaults */
+			AST_VAR_LIST_TRAVERSE(defaults, vard) {
+				if (ast_var_find(variables, vard->name)) {
+					continue;
+				}
+				varx = ast_var_assign(vard->name, vard->value);
+				AST_VAR_LIST_INSERT_TAIL(variables, varx);
+			}
+
+			ast_phoneprov_add_extension(SIPUSERS_PROVIDER_NAME, variables);
+		}
+	}
+	ast_config_destroy(cfg);
+	ast_var_list_destroy(defaults);
+	return 0;
+}
+
+static int load_common(void)
+{
+	struct ast_config *phoneprov_cfg;
+	struct ast_flags config_flags = { 0 };
+	char *cat;
+
+	if (!(phoneprov_cfg = ast_config_load("phoneprov.conf", config_flags))
+		|| phoneprov_cfg == CONFIG_STATUS_FILEINVALID) {
+		ast_log(LOG_ERROR, "Unable to load config phoneprov.conf\n");
+		return -1;
+	}
+
+	cat = NULL;
+	while ((cat = ast_category_browse(phoneprov_cfg, cat))) {
+		if (!strcasecmp(cat, "general")) {
+			continue;
+		}
+		build_profile(cat, ast_variable_browse(phoneprov_cfg, cat));
+	}
+	ast_config_destroy(phoneprov_cfg);
+
+	if (!ao2_container_count(profiles)) {
+		ast_log(LOG_ERROR, "There are no provisioning profiles in phoneprov.conf.\n");
+		return -1;
+	}
+
+	return 0;
+}
+
+static int unload_module(void)
+{
+	ast_http_uri_unlink(&phoneprovuri);
+	ast_custom_function_unregister(&pp_each_user_function);
+	ast_custom_function_unregister(&pp_each_extension_function);
+	ast_cli_unregister_multiple(pp_cli, ARRAY_LEN(pp_cli));
+
+	/* This cleans up the sip.conf/users.conf provider (called specifically for clarity) */
+	ast_phoneprov_provider_unregister(SIPUSERS_PROVIDER_NAME);
+
+	/* This cleans up the framework which also cleans up the providers. */
+	delete_profiles();
+	ao2_cleanup(profiles);
+	profiles = NULL;
+	delete_routes();
+	delete_users();
+	ao2_cleanup(http_routes);
+	http_routes = NULL;
+	ao2_cleanup(users);
+	users = NULL;
+	delete_providers();
+	ao2_cleanup(providers);
+	providers = NULL;
+
+	return 0;
+}
+
+/*!
+ * \brief Load the module
+ *
+ * Module loading including tests for configuration or dependencies.
+ * This function can return AST_MODULE_LOAD_FAILURE, AST_MODULE_LOAD_DECLINE,
+ * or AST_MODULE_LOAD_SUCCESS. If a dependency or environment variable fails
+ * tests return AST_MODULE_LOAD_FAILURE. If the module can not load the
+ * configuration file or other non-critical problem return
+ * AST_MODULE_LOAD_DECLINE. On success return AST_MODULE_LOAD_SUCCESS.
+ */
+static int load_module(void)
+{
+	profiles = ao2_container_alloc(MAX_PROFILE_BUCKETS, phone_profile_hash_fn, phone_profile_cmp_fn);
+	if (!profiles) {
+		ast_log(LOG_ERROR, "Unable to allocate profiles container.\n");
+		return AST_MODULE_LOAD_DECLINE;
+	}
+
+	http_routes = ao2_container_alloc(MAX_ROUTE_BUCKETS, http_route_hash_fn, http_route_cmp_fn);
+	if (!http_routes) {
+		ast_log(LOG_ERROR, "Unable to allocate routes container.\n");
+		goto error;
+	}
+
+	if (load_common()) {
+		ast_log(LOG_ERROR, "Unable to load provisioning profiles.\n");
+		goto error;
+	}
+
+	users = ao2_container_alloc(MAX_USER_BUCKETS, user_hash_fn, user_cmp_fn);
+	if (!users) {
+		ast_log(LOG_ERROR, "Unable to allocate users container.\n");
+		goto error;
+	}
+
+	providers = ao2_container_alloc(MAX_PROVIDER_BUCKETS, phoneprov_provider_hash_fn, phoneprov_provider_cmp_fn);
+	if (!providers) {
+		ast_log(LOG_ERROR, "Unable to allocate providers container.\n");
+		goto error;
+	}
+
+	/* Register ourselves as the provider for sip.conf/users.conf */
+	if (ast_phoneprov_provider_register(SIPUSERS_PROVIDER_NAME, load_users)) {
+		ast_log(LOG_WARNING, "Unable register sip/users config provider.  Others may succeed.\n");
+	}
+
+	ast_http_uri_link(&phoneprovuri);
+
+	ast_custom_function_register(&pp_each_user_function);
+	ast_custom_function_register(&pp_each_extension_function);
+	ast_cli_register_multiple(pp_cli, ARRAY_LEN(pp_cli));
+
+	return AST_MODULE_LOAD_SUCCESS;
+
+error:
+	unload_module();
+	return AST_MODULE_LOAD_DECLINE;
+>>>>>>> upstream/certified/13.8
 }
 
 AST_MODULE_INFO(ASTERISK_GPL_KEY, AST_MODFLAG_GLOBAL_SYMBOLS | AST_MODFLAG_LOAD_ORDER, "HTTP Phone Provisioning",
@@ -1497,6 +1767,105 @@ AST_MODULE_INFO(ASTERISK_GPL_KEY, AST_MODFLAG_GLOBAL_SYMBOLS | AST_MODFLAG_LOAD_
 	.reload = reload,
 	.load_pri = AST_MODPRI_CHANNEL_DEPEND,
 );
+
+/****  Public API for register/unregister, set defaults, and add extension. ****/
+
+const char *ast_phoneprov_std_variable_lookup(enum ast_phoneprov_std_variables var)
+{
+<<<<<<< HEAD
+	if (var >= AST_PHONEPROV_STD_VAR_LIST_LENGTH) {
+		return NULL;
+	}
+
+	return variable_lookup[var];
+}
+
+int ast_phoneprov_provider_register(char *provider_name,
+	ast_phoneprov_load_users_cb load_users)
+{
+	struct phoneprov_provider *provider;
+
+	if (ast_strlen_zero(provider_name)) {
+		ast_log(LOG_ERROR, "Provider name can't be empty.\n");
+		return -1;
+	}
+
+	if (!providers) {
+		ast_log(LOG_WARNING, "Provider '%s' cannot be registered: res_phoneprov not loaded.\n", provider_name);
+		return -1;
+	}
+
+	provider = find_provider(provider_name);
+	if (provider) {
+		ast_log(LOG_ERROR, "There is already a provider registered named '%s'.\n", provider_name);
+		ao2_ref(provider, -1);
+		return -1;
+	}
+
+	provider = ao2_alloc(sizeof(struct phoneprov_provider), provider_destructor);
+	if (!provider) {
+		ast_log(LOG_ERROR, "Unable to allocate sufficient memory for provider '%s'.\n", provider_name);
+		return -1;
+	}
+
+	if (ast_string_field_init(provider, 32)) {
+		ao2_ref(provider, -1);
+		ast_log(LOG_ERROR, "Unable to allocate sufficient memory for provider '%s' stringfields.\n", provider_name);
+		return -1;
+	}
+
+	ast_string_field_set(provider, provider_name, provider_name);
+	provider->load_users = load_users;
+
+	ao2_link(providers, provider);
+	ao2_ref(provider, -1);
+
+	if (provider->load_users()) {
+		ast_log(LOG_ERROR, "Unable to load provider '%s' users. Register aborted.\n", provider_name);
+		ast_phoneprov_provider_unregister(provider_name);
+		return -1;
+	}
+=======
+	struct ao2_iterator i;
+	struct phoneprov_provider *provider;
+
+	/* Clean everything except the providers */
+	delete_routes();
+	delete_users();
+	delete_profiles();
+
+	/* Reload the profiles */
+	if (load_common()) {
+		ast_log(LOG_ERROR, "Unable to reload provisioning profiles.\n");
+		unload_module();
+		return AST_MODULE_LOAD_DECLINE;
+	}
+
+	/* For each provider, reload the users */
+	ao2_lock(providers);
+	i = ao2_iterator_init(providers, 0);
+	for(; (provider = ao2_iterator_next(&i)); ao2_ref(provider, -1)) {
+		if (provider->load_users()) {
+			ast_log(LOG_ERROR, "Unable to load provider '%s' users. Reload aborted.\n", provider->provider_name);
+			continue;
+		}
+	}
+	ao2_iterator_destroy(&i);
+	ao2_unlock(providers);
+>>>>>>> upstream/certified/13.8
+
+	return AST_MODULE_LOAD_SUCCESS;
+}
+
+<<<<<<< HEAD
+=======
+AST_MODULE_INFO(ASTERISK_GPL_KEY, AST_MODFLAG_GLOBAL_SYMBOLS | AST_MODFLAG_LOAD_ORDER, "HTTP Phone Provisioning",
+		.support_level = AST_MODULE_SUPPORT_EXTENDED,
+		.load = load_module,
+		.unload = unload_module,
+		.reload = reload,
+		.load_pri = AST_MODPRI_CHANNEL_DEPEND,
+	);
 
 /****  Public API for register/unregister, set defaults, and add extension. ****/
 
@@ -1558,6 +1927,7 @@ int ast_phoneprov_provider_register(char *provider_name,
 	return 0;
 }
 
+>>>>>>> upstream/certified/13.8
 static int extensions_delete_cb(void *obj, void *arg, int flags)
 {
 	char *provider_name = arg;

@@ -432,7 +432,7 @@ static void send_unsolicited_mwi_notify(struct mwi_subscription *sub,
 	ast_debug(5, "Sending unsolicited MWI NOTIFY to endpoint %s, new messages: %d, old messages: %d\n",
 			sub->id, counter->new_msgs, counter->old_msgs);
 
-	while ((aor_name = strsep(&endpoint_aors, ","))) {
+	while ((aor_name = ast_strip(strsep(&endpoint_aors, ",")))) {
 		RAII_VAR(struct ast_sip_aor *, aor, ast_sip_location_retrieve_aor(aor_name), ao2_cleanup);
 		RAII_VAR(struct ao2_container *, contacts, NULL, ao2_cleanup);
 		struct unsolicited_mwi_data mwi_data = {
@@ -504,6 +504,7 @@ static void mwi_subscription_shutdown(struct ast_sip_subscription *sub)
 	ast_sip_subscription_remove_datastore(sub, MWI_DATASTORE);
 
 	ao2_ref(mwi_datastore, -1);
+<<<<<<< HEAD
 }
 
 static void mwi_ds_destroy(void *data)
@@ -513,6 +514,17 @@ static void mwi_ds_destroy(void *data)
 	ao2_ref(sub, -1);
 }
 
+=======
+}
+
+static void mwi_ds_destroy(void *data)
+{
+	struct mwi_subscription *sub = data;
+
+	ao2_ref(sub, -1);
+}
+
+>>>>>>> upstream/certified/13.8
 static struct ast_datastore_info mwi_ds_info = {
 	.destroy = mwi_ds_destroy,
 };
@@ -598,7 +610,11 @@ static int mwi_validate_for_aor(void *obj, void *arg, int flags)
 	}
 
 	mailboxes = ast_strdupa(aor->mailboxes);
-	while ((mailbox = strsep(&mailboxes, ","))) {
+	while ((mailbox = ast_strip(strsep(&mailboxes, ",")))) {
+		if (ast_strlen_zero(mailbox)) {
+			continue;
+		}
+
 		if (endpoint_receives_unsolicited_mwi_for_mailbox(endpoint, mailbox)) {
 			ast_debug(1, "Endpoint '%s' already configured for unsolicited MWI for mailbox '%s'. "
 					"Denying MWI subscription to %s\n", ast_sorcery_object_get_id(endpoint), mailbox,
@@ -622,6 +638,7 @@ static int mwi_on_aor(void *obj, void *arg, int flags)
 	}
 
 	mailboxes = ast_strdupa(aor->mailboxes);
+<<<<<<< HEAD
 	while ((mailbox = strsep(&mailboxes, ","))) {
 		struct mwi_stasis_subscription *mwi_stasis_sub;
 
@@ -630,6 +647,20 @@ static int mwi_on_aor(void *obj, void *arg, int flags)
 			continue;
 		}
 
+=======
+	while ((mailbox = ast_strip(strsep(&mailboxes, ",")))) {
+		struct mwi_stasis_subscription *mwi_stasis_sub;
+
+		if (ast_strlen_zero(mailbox)) {
+			continue;
+		}
+
+		mwi_stasis_sub = mwi_stasis_subscription_alloc(mailbox, sub);
+		if (!mwi_stasis_sub) {
+			continue;
+		}
+
+>>>>>>> upstream/certified/13.8
 		ao2_link(sub->stasis_subs, mwi_stasis_sub);
 		ao2_ref(mwi_stasis_sub, -1);
 	}
@@ -890,7 +921,11 @@ static int create_mwi_subscriptions_for_endpoint(void *obj, void *arg, int flags
 
 	endpoint_aors = ast_strdupa(endpoint->aors);
 
+<<<<<<< HEAD
 	while ((aor_name = strsep(&endpoint_aors, ","))) {
+=======
+	while ((aor_name = ast_strip(strsep(&endpoint_aors, ",")))) {
+>>>>>>> upstream/certified/13.8
 		RAII_VAR(struct ast_sip_aor *, aor, ast_sip_location_retrieve_aor(aor_name), ao2_cleanup);
 
 		if (!aor) {
@@ -921,11 +956,23 @@ static int create_mwi_subscriptions_for_endpoint(void *obj, void *arg, int flags
 	}
 
 	mailboxes = ast_strdupa(endpoint->subscription.mwi.mailboxes);
+<<<<<<< HEAD
 	while ((mailbox = strsep(&mailboxes, ","))) {
 		struct mwi_subscription *sub = aggregate_sub ?:
 			mwi_subscription_alloc(endpoint, 0, NULL);
 		struct mwi_stasis_subscription *mwi_stasis_sub;
 
+=======
+	while ((mailbox = ast_strip(strsep(&mailboxes, ",")))) {
+		struct mwi_subscription *sub;
+		struct mwi_stasis_subscription *mwi_stasis_sub;
+
+		if (ast_strlen_zero(mailbox)) {
+			continue;
+		}
+
+		sub = aggregate_sub ?: mwi_subscription_alloc(endpoint, 0, NULL);
+>>>>>>> upstream/certified/13.8
 		mwi_stasis_sub = mwi_stasis_subscription_alloc(mailbox, sub);
 		if (mwi_stasis_sub) {
 			ao2_link(sub->stasis_subs, mwi_stasis_sub);

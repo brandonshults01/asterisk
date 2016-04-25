@@ -1471,7 +1471,11 @@ void ast_rtp_codecs_payload_formats(struct ast_rtp_codecs *codecs, struct ast_fo
  *
  * \since 1.8
  */
+<<<<<<< HEAD
 int ast_rtp_codecs_payload_code(struct ast_rtp_codecs *codecs, int asterisk_format, struct ast_format *format, int code);
+=======
+int ast_rtp_codecs_payload_code(struct ast_rtp_codecs *codecs, int asterisk_format, const struct ast_format *format, int code);
+>>>>>>> upstream/certified/13.8
 
 /*!
  * \brief Retrieve a tx mapped payload type based on whether it is an Asterisk format and the code
